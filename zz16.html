@@ -1,0 +1,2467 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover"/>
+    <title>Monster Siege — Learning Edition</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@300;400;600;700&family=Share+Tech+Mono&display=swap" rel="stylesheet"/>
+    <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Fredoka', sans-serif;
+            background-color: #0c0a3e;
+            user-select: none;
+            -webkit-user-select: none;
+            overflow: hidden;
+            touch-action: none;
+            -webkit-tap-highlight-color: transparent;
+            width: 100vw;
+            height: 100vh;
+        }
+        .mono-font {
+            font-family: 'Share Tech Mono', monospace;
+        }
+        .pixel-borders {
+            box-shadow: 
+                0px -4px 0px 0px #1e1b4b,
+                0px 4px 0px 0px #1e1b4b,
+                -4px 0px 0px 0px #1e1b4b,
+                4px 0px 0px 0px #1e1b4b;
+        }
+        @keyframes pulse-fast {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.8; transform: scale(0.98); }
+        }
+        .danger-pulse {
+            animation: pulse-fast 1.5s infinite;
+        }
+        /* Custom scrollbar for leaderboard list */
+        #leaderboard-list::-webkit-scrollbar {
+            width: 6px;
+        }
+        #leaderboard-list::-webkit-scrollbar-track {
+            background: rgba(15, 23, 42, 0.6);
+            border-radius: 999px;
+        }
+        #leaderboard-list::-webkit-scrollbar-thumb {
+            background: #4f46e5;
+            border-radius: 999px;
+        }
+    </style>
+</head>
+<body class="text-white relative">
+
+    <!-- Splash/Home Screen Overlay -->
+    <div id="home-screen" class="absolute inset-0 bg-slate-950/95 flex flex-col items-center justify-center p-4 z-50 overflow-y-auto">
+        <div class="max-w-md w-full bg-indigo-950/80 border-4 border-indigo-500 rounded-3xl p-6 shadow-2xl relative">
+            <h1 class="text-3xl md:text-4xl font-extrabold text-center text-transparent bg-clip-text bg-gradient-to-r from-teal-400 via-indigo-400 to-pink-500 tracking-wider uppercase mb-2">
+                Monster Siege
+            </h1>
+            <p class="text-center text-xs text-indigo-300 font-semibold mb-6 uppercase tracking-widest">
+                Learning & defense Edition
+            </p>
+
+            <!-- Class Selection -->
+            <div class="mb-4">
+                <label class="block text-xs font-bold text-indigo-300 mb-2 uppercase tracking-wide">Select your Character Class</label>
+                <div class="grid grid-cols-2 gap-2">
+                    <button onclick="selectClass('engineer')" id="class-engineer" class="class-btn p-3 rounded-2xl border-2 border-indigo-500 bg-indigo-900 text-left transition-all duration-150">
+                        <div class="font-extrabold text-sm text-teal-400"><i class="fa-solid fa-wrench mr-2"></i>Engineer</div>
+                        <div class="text-[10px] text-indigo-200 mt-1">Faster builds & higher turret HP</div>
+                    </button>
+                    <button onclick="selectClass('gunner')" id="class-gunner" class="class-btn p-3 rounded-2xl border-2 border-slate-700 bg-slate-900/60 text-left transition-all duration-150">
+                        <div class="font-extrabold text-sm text-amber-400"><i class="fa-solid fa-gun mr-2"></i>Gunner</div>
+                        <div class="text-[10px] text-indigo-200 mt-1">Higher base fire rates</div>
+                    </button>
+                    <button onclick="selectClass('medic')" id="class-medic" class="class-btn p-3 rounded-2xl border-2 border-slate-700 bg-slate-900/60 text-left transition-all duration-150">
+                        <div class="font-extrabold text-sm text-emerald-400"><i class="fa-solid fa-heart mr-2"></i>Medic</div>
+                        <div class="text-[10px] text-indigo-200 mt-1">Regenerate base HP slowly</div>
+                    </button>
+                    <button onclick="selectClass('commando')" id="class-commando" class="class-btn p-3 rounded-2xl border-2 border-slate-700 bg-slate-900/60 text-left transition-all duration-150">
+                        <div class="font-extrabold text-sm text-rose-400"><i class="fa-solid fa-shield-halved mr-2"></i>Commando</div>
+                        <div class="text-[10px] text-indigo-200 mt-1">Slightly more personal damage</div>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Difficulty Selection -->
+            <div class="mb-4">
+                <label class="block text-xs font-bold text-indigo-300 mb-2 uppercase tracking-wide">Select Speed Difficulty</label>
+                <div class="grid grid-cols-3 gap-2">
+                    <button onclick="selectDifficulty('easy')" id="diff-easy" class="diff-btn p-2 rounded-xl border-2 border-slate-700 bg-slate-900/60 text-center transition-all duration-150">
+                        <div class="font-extrabold text-xs text-emerald-400"><i class="fa-solid fa-face-smile mr-1"></i>Easy</div>
+                        <div class="text-[9px] text-indigo-200 mt-0.5">Super Slow</div>
+                    </button>
+                    <button onclick="selectDifficulty('medium')" id="diff-medium" class="diff-btn p-2 rounded-xl border-2 border-indigo-500 bg-indigo-900 text-center transition-all duration-150">
+                        <div class="font-extrabold text-xs text-indigo-400"><i class="fa-solid fa-face-meh mr-1"></i>Medium</div>
+                        <div class="text-[9px] text-indigo-200 mt-0.5">Standard</div>
+                    </button>
+                    <button onclick="selectDifficulty('hard')" id="diff-hard" class="diff-btn p-2 rounded-xl border-2 border-slate-700 bg-slate-900/60 text-center transition-all duration-150">
+                        <div class="font-extrabold text-xs text-rose-400"><i class="fa-solid fa-face-angry mr-1"></i>Hard</div>
+                        <div class="text-[9px] text-indigo-200 mt-0.5">Super Fast</div>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Host/Join Game Area -->
+            <div class="space-y-3 mb-6">
+                <div class="bg-indigo-950/50 border border-indigo-800 rounded-2xl p-3">
+                    <button onclick="hostGame()" class="w-full bg-gradient-to-r from-teal-500 to-emerald-600 hover:from-teal-400 hover:to-emerald-500 text-slate-950 font-bold py-2.5 px-4 rounded-xl shadow-lg transform transition active:scale-98 uppercase text-sm flex items-center justify-center gap-2">
+                        <i class="fa-solid fa-tower-broadcast"></i> Host Multiplayer Session
+                    </button>
+                </div>
+                
+                <div class="bg-indigo-950/50 border border-indigo-800 rounded-2xl p-3 flex flex-col gap-2">
+                    <input type="text" id="join-room-id" placeholder="Enter 5-Char Room ID" class="w-full bg-slate-950/80 border border-indigo-800 rounded-xl py-2 px-3 text-center text-sm font-semibold text-white tracking-widest placeholder-slate-600 focus:outline-none focus:border-indigo-400 uppercase"/>
+                    <button onclick="joinGame()" class="w-full bg-gradient-to-r from-indigo-500 to-pink-600 hover:from-indigo-400 hover:to-pink-500 text-white font-bold py-2 px-4 rounded-xl shadow-lg transform transition active:scale-98 uppercase text-sm flex items-center justify-center gap-2">
+                        <i class="fa-solid fa-plug"></i> Join Session
+                    </button>
+                </div>
+            </div>
+
+            <!-- Singleplayer Launch & Options -->
+            <div class="flex flex-col gap-3">
+                <button onclick="launchGame()" class="w-full bg-indigo-500 hover:bg-indigo-400 text-white font-bold py-3 px-6 rounded-2xl shadow-xl transform transition active:scale-95 uppercase text-base flex items-center justify-center gap-2">
+                    <i class="fa-solid fa-play"></i> Start Singleplayer Game
+                </button>
+
+                <div class="flex items-center justify-between border-t border-indigo-900 pt-3">
+                    <label class="flex items-center gap-2 cursor-pointer text-indigo-300 text-xs font-semibold uppercase tracking-wider">
+                        <input type="checkbox" id="kid-mode-toggle" class="form-checkbox h-4 w-4 text-indigo-600 border-indigo-500 rounded bg-indigo-900 focus:ring-0 focus:ring-offset-0"/>
+                        <span>Enable Kid Mode</span>
+                    </label>
+                    <div class="flex gap-2.5">
+                        <button onclick="toggleLeaderboardModal(true)" class="text-xs text-amber-400 underline hover:text-amber-300 uppercase tracking-wide font-bold">Leaderboard</button>
+                        <button onclick="toggleAboutModal(true)" class="text-xs text-indigo-400 underline hover:text-indigo-300 uppercase tracking-wide font-bold">How to Play</button>
+                        <button onclick="toggleDevTeamModal(true)" class="text-xs text-pink-400 underline hover:text-pink-300 uppercase tracking-wide font-bold">Meet the Devs</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Professional Kids Corp Copyright -->
+            <div class="mt-5 border-t border-indigo-900/60 pt-3 text-center text-[10px] text-indigo-400/80 tracking-wide font-medium">
+                <p class="uppercase font-semibold tracking-widest text-indigo-300 mb-0.5">Giggle Byte Games</p>
+                <p>&copy; 2026 Giggle Byte Games. Developed by kids aged 7-13. All Rights Reserved.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Game Play Area Container -->
+    <div id="game-container" class="absolute inset-0 flex flex-col lg:flex-row bg-slate-950 select-none touch-none">
+        
+        <!-- Left Pane: Game Canvas and Visuals -->
+        <div class="relative flex-grow flex items-center justify-center bg-slate-950 p-2 overflow-hidden h-[60vh] lg:h-full">
+            <canvas id="game-canvas" class="border border-indigo-900/40 rounded-xl bg-slate-900 shadow-inner w-full h-full max-w-full max-h-full aspect-video"></canvas>
+            
+            <!-- Floating Mobile Joystick overlay -->
+            <div id="touch-controls" class="absolute bottom-4 left-4 flex gap-4 pointer-events-none md:hidden z-30">
+                <div id="joystick-container" class="w-24 h-24 bg-slate-950/40 border border-slate-800 rounded-full flex items-center justify-center pointer-events-auto shadow-lg backdrop-blur-sm">
+                    <div id="joystick-handle" class="w-8 h-8 bg-indigo-500 rounded-full transform transition duration-100 shadow-md"></div>
+                </div>
+            </div>
+
+            <!-- Mobile Utility Buttons Overlay (Easily findable on mobile!) -->
+            <div class="absolute bottom-4 right-4 flex flex-col gap-2 pointer-events-auto md:hidden z-30">
+                <button onclick="toggleOmniShoot()" id="mobile-omni-btn" class="bg-slate-900 text-indigo-400 border border-indigo-900/50 rounded-2xl py-3 px-4 text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-2 shadow-lg transition-all duration-150">
+                    <i class="fa-solid fa-compass"></i> Omni: <span id="mobile-omni-status">OFF</span>
+                </button>
+                <button onclick="toggleAFKMode()" id="mobile-afk-btn" class="bg-slate-900 text-indigo-400 border border-indigo-900/50 rounded-2xl py-3 px-4 text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-2 shadow-lg transition-all duration-150">
+                    <i class="fa-solid fa-hourglass"></i> AFK: <span id="mobile-afk-status">OFF</span>
+                </button>
+            </div>
+
+            <!-- Pause button overlay on Canvas -->
+            <div class="absolute top-4 right-4 flex gap-2">
+                <button onclick="toggleAudioMute()" class="p-2.5 rounded-xl bg-slate-950/60 border border-slate-800 text-indigo-400 hover:text-indigo-300 hover:bg-slate-900/60 pointer-events-auto">
+                    <i id="audio-mute-icon" class="fa-solid fa-volume-high"></i>
+                </button>
+                <button onclick="togglePauseGame()" class="p-2.5 rounded-xl bg-slate-950/60 border border-slate-800 text-indigo-400 hover:text-indigo-300 hover:bg-slate-900/60 pointer-events-auto">
+                    <i class="fa-solid fa-pause"></i>
+                </button>
+            </div>
+
+            <!-- Host/Room Info Badge -->
+            <div id="room-info-badge" class="hidden absolute top-4 left-4 bg-slate-950/70 border border-indigo-500/30 px-3 py-1.5 rounded-xl text-xs font-semibold backdrop-blur-sm">
+                <span class="text-indigo-400">ROOM ID:</span> <span id="room-id-val" class="text-indigo-200 uppercase tracking-widest font-mono"></span>
+                <button onclick="copyRoomId()" class="ml-2 text-indigo-400 hover:text-indigo-200"><i class="fa-solid fa-copy"></i></button>
+            </div>
+        </div>
+
+        <!-- Right/Bottom Pane: Interactive Console, Build Station, Learning Engine -->
+        <div class="w-full lg:w-[420px] flex-shrink-0 bg-slate-950 border-t lg:border-t-0 lg:border-l border-indigo-950 p-3 flex flex-col justify-between overflow-y-auto h-[40vh] lg:h-full gap-3 relative">
+            
+            <!-- HUD / Scores & Base HP & Armor -->
+            <div class="bg-indigo-950/40 border border-indigo-900 rounded-2xl p-3 flex justify-between items-center relative">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 bg-indigo-500/10 border border-indigo-500 rounded-xl flex items-center justify-center">
+                        <i class="fa-solid fa-fortress text-indigo-400"></i>
+                    </div>
+                    <div>
+                        <div class="text-[10px] text-indigo-400 font-bold uppercase tracking-wide">Base Defense</div>
+                        <div class="flex flex-col gap-0.5">
+                            <span id="base-hp-text" class="text-sm font-extrabold text-indigo-200">100/100</span>
+                            <!-- Shield Status display -->
+                            <span id="armor-status-text" class="text-[10px] text-cyan-400 font-extrabold tracking-wide hidden"><i class="fa-solid fa-shield-halved"></i> Shield: 100 AP</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="flex flex-col items-end">
+                    <div class="text-[10px] text-indigo-400 font-bold uppercase tracking-wide">Scrap Available</div>
+                    <span id="hud-scrap" class="text-lg font-black text-amber-400 mono-font tracking-wide">150</span>
+                </div>
+            </div>
+
+            <!-- MATH LEARNING ENGINE PANEL -->
+            <div id="math-panel" class="bg-indigo-950/60 border-2 border-indigo-500 rounded-2xl p-3 shadow-2xl backdrop-blur-sm flex flex-col gap-2 relative">
+                <div class="flex justify-between items-center">
+                    <span class="text-[10px] text-indigo-300 font-bold uppercase tracking-widest">Continuous Learning Engine</span>
+                    <span id="math-streak-badge" class="hidden bg-amber-500 text-slate-950 text-[10px] font-black px-2 py-0.5 rounded-full uppercase animate-bounce">
+                        <i class="fa-solid fa-fire mr-1"></i>Streak <span id="math-streak-val">0</span>
+                    </span>
+                </div>
+                <!-- 20-second countdown bar -->
+                <div class="w-full bg-slate-950/60 h-2.5 rounded-full overflow-hidden border border-slate-900 mb-1 relative">
+                    <div id="math-timer-bar" class="bg-gradient-to-r from-emerald-400 to-teal-500 h-full w-full transition-all duration-100"></div>
+                </div>
+                <div id="math-question-box" class="bg-slate-950/40 border border-slate-800 rounded-xl p-3 text-center min-h-[48px] flex items-center justify-center relative">
+                    <p id="math-question-text" class="text-sm font-bold text-slate-100 tracking-wide">Connecting...</p>
+                </div>
+                <div id="math-options-grid" class="grid grid-cols-2 gap-2">
+                    <!-- Option buttons populated by JS -->
+                </div>
+            </div>
+
+            <!-- DEFENSE BUILDING & UPGRADE PORT -->
+            <div class="bg-indigo-950/20 border border-indigo-950 rounded-2xl p-3">
+                <h3 class="text-xs font-bold text-indigo-300 uppercase tracking-widest mb-2"><i class="fa-solid fa-hammer mr-1.5"></i>Engineering Station</h3>
+                <div class="grid grid-cols-2 gap-2">
+                    <button onclick="buyGear('turret-basic')" class="flex flex-col items-start bg-indigo-950/80 hover:bg-indigo-900 border border-indigo-900 p-2.5 rounded-xl transition duration-150 relative">
+                        <div class="text-[11px] font-bold text-indigo-200">Basic Turret</div>
+                        <div class="text-[10px] text-slate-400 mt-0.5">Reliable Single-Target</div>
+                        <span class="text-xs text-amber-400 font-black mt-1.5"><i class="fa-solid fa-cubes mr-1"></i>100</span>
+                    </button>
+                    <button onclick="buyGear('turret-aoe')" class="flex flex-col items-start bg-indigo-950/80 hover:bg-indigo-900 border border-indigo-900 p-2.5 rounded-xl transition duration-150 relative">
+                        <div class="text-[11px] font-bold text-indigo-200">Plasma Wave (AOE)</div>
+                        <div class="text-[10px] text-slate-400 mt-0.5">Multi-Target Shockwave</div>
+                        <span class="text-xs text-amber-400 font-black mt-1.5"><i class="fa-solid fa-cubes mr-1"></i>250</span>
+                    </button>
+                    <button onclick="buyGear('turret-rapid')" class="flex flex-col items-start bg-indigo-950/80 hover:bg-indigo-900 border border-indigo-900 p-2.5 rounded-xl transition duration-150 relative">
+                        <div class="text-[11px] font-bold text-indigo-200">Gatling (Rapid)</div>
+                        <div class="text-[10px] text-slate-400 mt-0.5">High Speed Shredder</div>
+                        <span class="text-xs text-amber-400 font-black mt-1.5"><i class="fa-solid fa-cubes mr-1"></i>200</span>
+                    </button>
+                    <button onclick="buyGear('turret-sniper')" class="flex flex-col items-start bg-indigo-950/80 hover:bg-indigo-900 border border-indigo-900 p-2.5 rounded-xl transition duration-150 relative">
+                        <div class="text-[11px] font-bold text-indigo-200">Railgun (Sniper)</div>
+                        <div class="text-[10px] text-slate-400 mt-0.5">Extreme range & piercing</div>
+                        <span class="text-xs text-amber-400 font-black mt-1.5"><i class="fa-solid fa-cubes mr-1"></i>300</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Utility Toggles / Omni-Shoot & AFK mode (Desktop view) -->
+            <div class="flex gap-2">
+                <button onclick="toggleOmniShoot()" id="omni-shoot-btn" class="flex-grow bg-slate-900 hover:bg-indigo-950 text-indigo-400 hover:text-indigo-300 border border-indigo-900/50 rounded-xl py-2 px-3 text-xs font-bold uppercase transition flex items-center justify-center gap-1.5">
+                    <i class="fa-solid fa-compass"></i> Omni-Shoot: <span id="omni-status">OFF</span>
+                </button>
+                <button onclick="toggleAFKMode()" id="afk-mode-btn" class="flex-grow bg-slate-900 hover:bg-indigo-950 text-indigo-400 hover:text-indigo-300 border border-indigo-900/50 rounded-xl py-2 px-3 text-xs font-bold uppercase transition flex items-center justify-center gap-1.5">
+                    <i class="fa-solid fa-hourglass"></i> AFK Shoot: <span id="afk-status">OFF</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Turret Placement Overlay Instructions -->
+    <div id="placement-toolbar" class="hidden absolute top-4 left-1/2 -translate-x-1/2 bg-slate-950/90 border-2 border-amber-500 rounded-2xl p-3 flex items-center gap-4 shadow-2xl z-40 pointer-events-auto">
+        <span class="text-xs font-bold text-amber-400 uppercase tracking-widest"><i class="fa-solid fa-compass-drafting animate-spin mr-1"></i> Placing Turret</span>
+        <button onclick="cancelTurretPlacement()" class="bg-rose-600 hover:bg-rose-500 text-white text-xs font-extrabold px-3 py-1.5 rounded-xl uppercase transition">Cancel</button>
+    </div>
+
+    <!-- GAME OVER / VICTORY OVERLAY -->
+    <div id="game-over-screen" class="hidden absolute inset-0 bg-slate-950/90 flex flex-col items-center justify-center p-4 z-50">
+        <div class="max-w-sm w-full bg-indigo-950 border-4 border-rose-500 rounded-3xl p-6 shadow-2xl text-center flex flex-col gap-4">
+            <h2 id="end-screen-title" class="text-3xl font-black text-rose-500 uppercase tracking-wider">Base Defeated</h2>
+            <div class="bg-slate-950/60 rounded-2xl p-4 text-indigo-200 text-left space-y-2 font-mono">
+                <div>Wave Reached: <span id="end-wave-val" class="text-teal-400 font-bold">1</span></div>
+                <div>Monsters Killed: <span id="end-kills-val" class="text-teal-400 font-bold">0</span></div>
+                <div>Math Streaks Met: <span id="end-math-streak-val" class="text-teal-400 font-bold">0</span></div>
+            </div>
+
+            <!-- Leaderboard Score Submission -->
+            <div id="leaderboard-submit-box" class="bg-slate-950/60 rounded-2xl p-4 text-center space-y-2 border border-indigo-900/40">
+                <label class="block text-xs font-bold text-indigo-300 uppercase tracking-wider">Join the Giggle Hall of Fame!</label>
+                <div class="flex gap-2">
+                    <input type="text" id="leaderboard-name-input" placeholder="Wacky Nickname" maxlength="15" class="w-full bg-slate-900 border border-indigo-800 rounded-xl py-2 px-3 text-sm text-center text-white focus:outline-none focus:border-indigo-500 font-bold"/>
+                    <button onclick="submitScore()" id="btn-submit-score" class="bg-amber-500 hover:bg-amber-400 text-slate-950 font-black px-4 py-2 rounded-xl text-xs uppercase tracking-wide transition">
+                        Submit
+                    </button>
+                </div>
+            </div>
+
+            <button onclick="restartGame()" class="w-full bg-teal-500 hover:bg-teal-400 text-slate-950 font-black py-3 px-6 rounded-2xl shadow-lg uppercase tracking-widest transform transition active:scale-95">
+                Play Again
+            </button>
+            <button onclick="goHome()" class="w-full bg-slate-900 hover:bg-slate-800 text-indigo-400 py-2 rounded-xl text-xs font-bold uppercase transition">
+                Return to Menu
+            </button>
+        </div>
+    </div>
+
+    <!-- About Game / Modal info -->
+    <div id="about-modal" class="hidden absolute inset-0 bg-slate-950/90 flex items-center justify-center p-4 z-50">
+        <div class="max-w-md w-full bg-indigo-950 border-2 border-indigo-500 rounded-3xl p-6 shadow-2xl space-y-4">
+            <h3 class="text-xl font-bold text-indigo-300 uppercase tracking-wider">How to Play</h3>
+            <div class="text-sm text-indigo-200 space-y-2 leading-relaxed">
+                <p>1. Move with <span class="font-bold text-white">WASD / Arrow Keys</span> on PC, or use the touch controller/click targets on mobile devices.</p>
+                <p>2. Your weapon fires automatically towards the closest monster, or you can click anywhere to aim.</p>
+                <p>3. Answer math questions to earn <span class="font-bold text-amber-400">Scrap</span>. Just 3 consecutive correct answers triggers a massive <span class="font-bold text-emerald-400">MONSTER WIPE</span>! In multiplayer, both host and client can input solutions dynamically.</p>
+                <p>4. Build & upgrade defenses using scrap. To build, purchase a turret type and tap a clear slot on the map.</p>
+                <p>5. If you fail to answer within the <span class="font-bold text-rose-400">20-second continuous timer</span>, or submit 5 wrong answers, a random defense turret is lost.</p>
+            </div>
+            <button onclick="toggleAboutModal(false)" class="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-2 px-4 rounded-xl uppercase transition">Close</button>
+        </div>
+    </div>
+
+    <!-- Leaderboard Modal (Giggle Hall of Fame) -->
+    <div id="leaderboard-modal" class="hidden absolute inset-0 bg-slate-950/90 flex items-center justify-center p-4 z-50">
+        <div class="max-w-md w-full bg-indigo-950 border-2 border-amber-500 rounded-3xl p-6 shadow-2xl space-y-4">
+            <h3 class="text-xl font-bold text-amber-400 uppercase tracking-wider text-center flex items-center justify-center gap-2">
+                <i class="fa-solid fa-trophy text-amber-400 animate-bounce"></i> Giggle Hall of Fame
+            </h3>
+            
+            <!-- GitHub Self-Hosting Helper Banner -->
+            <div id="github-helper-banner" class="bg-indigo-900/60 border border-indigo-500/30 rounded-2xl p-3 text-[10px] text-indigo-200/90 leading-relaxed">
+                <span class="font-bold text-amber-400 flex items-center gap-1.5 mb-1">
+                    <i class="fa-brands fa-github text-sm"></i> Hosting on GitHub Pages?
+                </span>
+                To enable a permanent, live cross-device leaderboard, open this file in any text editor and swap the default mock credentials near line 510 with your free Google Firebase keys! Local temporary sessions are running until then.
+            </div>
+
+            <div id="leaderboard-list" class="max-h-[220px] overflow-y-auto pr-1">
+                <!-- Live leaderboard gets injected here -->
+                <div class="text-center text-indigo-300 py-4 italic text-sm">Loading defenders...</div>
+            </div>
+            <button onclick="toggleLeaderboardModal(false)" class="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-2 px-4 rounded-xl uppercase transition">
+                Back to Safety
+            </button>
+        </div>
+    </div>
+
+    <!-- PROFESSIONAL DEV TEAM MODAL (Giggle Byte Games) -->
+    <div id="dev-team-modal" class="hidden absolute inset-0 bg-slate-950/95 flex items-center justify-center p-4 z-50">
+        <div class="max-w-lg w-full bg-indigo-950 border-4 border-pink-500 rounded-3xl p-6 shadow-2xl flex flex-col gap-4 max-h-[90vh] overflow-y-auto">
+            <div class="text-center">
+                <span class="text-pink-400 text-xs font-black tracking-widest uppercase">Creative Indie Studio</span>
+                <h3 class="text-2xl font-black text-transparent bg-clip-text bg-gradient-to-r from-pink-400 to-amber-400 uppercase tracking-wider mt-1">Giggle Byte Games</h3>
+                <p class="text-xs text-indigo-300 mt-1 italic">"We develop during school recess and after dinner."</p>
+            </div>
+
+            <!-- Dev List -->
+            <div class="space-y-3.5 mt-2">
+                <!-- Sid -->
+                <div class="bg-slate-900/60 border border-indigo-500/20 p-3 rounded-2xl flex gap-3.5 items-start">
+                    <div class="w-10 h-10 bg-amber-500/10 border border-amber-500 text-amber-400 rounded-xl flex items-center justify-center text-lg flex-shrink-0">
+                        <i class="fa-solid fa-crown"></i>
+                    </div>
+                    <div>
+                        <div class="flex items-baseline gap-2">
+                            <h4 class="font-bold text-sm text-white">Sid</h4>
+                            <span class="text-[9px] bg-amber-500/20 text-amber-300 px-1.5 py-0.5 rounded-full font-bold uppercase tracking-wide">CEO & Developer</span>
+                        </div>
+                        <p class="text-xs text-indigo-200/90 mt-1 leading-relaxed">
+                            He came up with this whole stupidly silly game idea. He immediately declared himself the boss, assigned everyone work, and then vanished to go build Minecraft castles.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Abhi -->
+                <div class="bg-slate-900/60 border border-indigo-500/20 p-3 rounded-2xl flex gap-3.5 items-start">
+                    <div class="w-10 h-10 bg-teal-500/10 border border-teal-500 text-teal-400 rounded-xl flex items-center justify-center text-lg flex-shrink-0">
+                        <i class="fa-solid fa-code"></i>
+                    </div>
+                    <div>
+                        <div class="flex items-baseline gap-2">
+                            <h4 class="font-bold text-sm text-white">Abhi</h4>
+                            <span class="text-[9px] bg-teal-500/20 text-teal-300 px-1.5 py-0.5 rounded-full font-bold uppercase tracking-wide">Lead Programmer</span>
+                        </div>
+                        <p class="text-xs text-indigo-200/90 mt-1 leading-relaxed">
+                            Spends 90% of the working hours sleeping on the couch or eating chips. But then suddenly—without warning—he enters hyper-drive mode and writes 500 lines of bug-free JavaScript in 10 minutes.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Nishi -->
+                <div class="bg-slate-900/60 border border-indigo-500/20 p-3 rounded-2xl flex gap-3.5 items-start">
+                    <div class="w-10 h-10 bg-rose-500/10 border border-rose-500 text-rose-400 rounded-xl flex items-center justify-center text-lg flex-shrink-0">
+                        <i class="fa-solid fa-bug-slash"></i>
+                    </div>
+                    <div>
+                        <div class="flex items-baseline gap-2">
+                            <h4 class="font-bold text-sm text-white">Nishi</h4>
+                            <span class="text-[9px] bg-rose-500/20 text-rose-300 px-1.5 py-0.5 rounded-full font-bold uppercase tracking-wide">Chief Game Tester</span>
+                        </div>
+                        <p class="text-xs text-indigo-200/90 mt-1 leading-relaxed">
+                            The ultimate quality inspector. His testing strategy is simple: point at the computer screen and repeatedly scream, <span class="italic text-rose-400">"IT'S NOT WORKING!"</span> until someone else fixes the code.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Ani -->
+                <div class="bg-slate-900/60 border border-indigo-500/20 p-3 rounded-2xl flex gap-3.5 items-start">
+                    <div class="w-10 h-10 bg-pink-500/10 border border-pink-500 text-pink-400 rounded-xl flex items-center justify-center text-lg flex-shrink-0">
+                        <i class="fa-solid fa-wand-magic-sparkles"></i>
+                    </div>
+                    <div>
+                        <div class="flex items-baseline gap-2">
+                            <h4 class="font-bold text-sm text-white">Ani</h4>
+                            <span class="text-[9px] bg-pink-500/20 text-pink-300 px-1.5 py-0.5 rounded-full font-bold uppercase tracking-wide">Creative Director</span>
+                        </div>
+                        <p class="text-xs text-indigo-200/90 mt-1 leading-relaxed">
+                            The visionary. Spun around in his swivel chair until he generated 100 crazy, amazing ideas. He's the genius responsible for the googly eyes, funny names, and making math actually fun.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <button onclick="toggleDevTeamModal(false)" class="w-full bg-pink-600 hover:bg-pink-500 text-white font-bold py-2.5 px-4 rounded-xl uppercase transition text-xs tracking-wider mt-2">
+                Back to the Studio
+            </button>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, collection, addDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        // === FIREBASE CONFIGURATION ===
+        // To run permanently on GitHub Pages, edit these variables to match your personal Firebase Credentials!
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'monster-siege-learning';
+        const firebaseConfig = typeof __firebase_config !== 'undefined' 
+            ? JSON.parse(__firebase_config) 
+            : {
+                apiKey: "mock-api-key",
+                authDomain: "mock-auth-domain",
+                projectId: "mock-project-id",
+                storageBucket: "mock-storage-bucket",
+                messagingSenderId: "mock-sender-id",
+                appId: "mock-app-id"
+              };
+
+        let app;
+        let auth;
+        let db;
+        let useMockDatabase = false;
+
+        // Graceful initialization check
+        try {
+            if (firebaseConfig.apiKey === "mock-api-key") {
+                useMockDatabase = true;
+            } else {
+                app = initializeApp(firebaseConfig);
+                auth = getAuth(app);
+                db = getFirestore(app);
+            }
+        } catch (e) {
+            console.warn("Could not load Firestore database. Falling back to local ledger mode.", e);
+            useMockDatabase = true;
+        }
+
+        let currentUser = null;
+        let currentUserId = null;
+        
+        // Local fallback ledger configuration
+        let localLeaderboardData = [
+            { name: "PoopyMcSplat", score: 3400, wave: 5, kills: 45 },
+            { name: "FartyMcFly", score: 2100, wave: 3, kills: 28 },
+            { name: "SirBurpsALot", score: 1850, wave: 2, kills: 19 }
+        ];
+
+        // Auth initialization loop
+        async function authenticate() {
+            if (useMockDatabase) {
+                console.log("Mocking database layer. Local session scoreboard is active.");
+                renderLeaderboardUI();
+                return;
+            }
+            try {
+                if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                    const userCred = await signInWithCustomToken(auth, __initial_auth_token);
+                    currentUser = userCred.user;
+                } else {
+                    const userCred = await signInAnonymously(auth);
+                    currentUser = userCred.user;
+                }
+                currentUserId = currentUser.uid;
+                console.log("Authenticated with UID:", currentUserId);
+                setupLeaderboardListener();
+            } catch (err) {
+                console.error("Auth failed. Falling back to mock database ledger.", err);
+                useMockDatabase = true;
+                renderLeaderboardUI();
+            }
+        }
+        authenticate();
+
+        // Listen for live high-score submissions
+        function setupLeaderboardListener() {
+            if (useMockDatabase || !currentUser) return;
+            try {
+                const leaderboardCol = collection(db, 'artifacts', appId, 'public', 'data', 'leaderboard');
+                onSnapshot(leaderboardCol, (snapshot) => {
+                    const scores = [];
+                    snapshot.forEach(doc => {
+                        scores.push({ id: doc.id, ...doc.data() });
+                    });
+                    // Sort in memory by score descending
+                    scores.sort((a, b) => b.score - a.score);
+                    localLeaderboardData = scores.slice(0, 10); // Take top 10 scores
+                    renderLeaderboardUI();
+                }, (error) => {
+                    console.error("Leaderboard read failed:", error);
+                });
+            } catch (e) {
+                console.warn("Error subscribing to Firestore.", e);
+            }
+        }
+
+        function renderLeaderboardUI() {
+            const listContainer = document.getElementById('leaderboard-list');
+            if (!listContainer) return;
+
+            if (localLeaderboardData.length === 0) {
+                listContainer.innerHTML = `<div class="text-center text-indigo-300 py-4 italic text-sm">No scores recorded yet. Be the first!</div>`;
+                return;
+            }
+
+            let html = '';
+            localLeaderboardData.sort((a, b) => b.score - a.score).forEach((item, idx) => {
+                const medalColor = idx === 0 ? 'text-amber-400' : (idx === 1 ? 'text-slate-300' : (idx === 2 ? 'text-amber-600' : 'text-indigo-400'));
+                html += `
+                    <div class="flex items-center justify-between bg-slate-900/60 border border-indigo-950/50 rounded-xl p-2.5 mb-2 font-mono text-xs">
+                        <div class="flex items-center gap-2">
+                            <span class="font-bold ${medalColor} w-6 text-center">#${idx + 1}</span>
+                            <span class="font-bold text-white max-w-[120px] truncate">${item.name}</span>
+                        </div>
+                        <div class="flex items-center gap-4">
+                            <span class="text-teal-400 font-bold">W${item.wave}</span>
+                            <span class="text-amber-400 font-extrabold">${item.score} pts</span>
+                        </div>
+                    </div>
+                `;
+            });
+            listContainer.innerHTML = html;
+        }
+
+        async function submitScore() {
+            const input = document.getElementById('leaderboard-name-input');
+            const btn = document.getElementById('btn-submit-score');
+            if (!input || !btn) return;
+
+            const nickname = input.value.trim();
+            if (!nickname) {
+                floatingTexts.push(new FloatingText(player.x, player.y - 10, "Need a funny name!", "#ef4444", 14));
+                return;
+            }
+
+            btn.disabled = true;
+            btn.textContent = "Saving...";
+
+            if (useMockDatabase) {
+                // Save locally to keep leaderboard operational on standalone page
+                localLeaderboardData.push({
+                    name: nickname,
+                    score: score,
+                    wave: wave,
+                    kills: kills,
+                    timestamp: Date.now()
+                });
+                localLeaderboardData.sort((a, b) => b.score - a.score);
+                renderLeaderboardUI();
+                input.value = '';
+                document.getElementById('leaderboard-submit-box').classList.add('hidden');
+                floatingTexts.push(new FloatingText(400, 200, "Local highscore saved!", "#10b981", 16));
+                toggleLeaderboardModal(true);
+                return;
+            }
+
+            try {
+                const leaderboardCol = collection(db, 'artifacts', appId, 'public', 'data', 'leaderboard');
+                await addDoc(leaderboardCol, {
+                    name: nickname,
+                    score: score,
+                    wave: wave,
+                    kills: kills,
+                    timestamp: Date.now(),
+                    userId: currentUserId || 'local'
+                });
+                
+                input.value = '';
+                document.getElementById('leaderboard-submit-box').classList.add('hidden');
+                floatingTexts.push(new FloatingText(400, 200, "Hall of Fame updated!", "#10b981", 16));
+                toggleLeaderboardModal(true);
+            } catch (err) {
+                console.error("Failed to save score:", err);
+                btn.disabled = false;
+                btn.textContent = "Submit";
+            }
+        }
+
+        function toggleLeaderboardModal(show) {
+            const modal = document.getElementById('leaderboard-modal');
+            if (modal) {
+                if (show) modal.classList.remove('hidden');
+                else modal.classList.add('hidden');
+            }
+        }
+
+        function toggleDevTeamModal(show) {
+            const modal = document.getElementById('dev-team-modal');
+            if (modal) {
+                if (show) modal.classList.remove('hidden');
+                else modal.classList.add('hidden');
+            }
+        }
+
+        // === AUDIO SYNTHESIS SYSTEM ===
+        let audioCtx = null;
+        let bgMusicInterval = null;
+        let bgMusicActive = false;
+        let beatCount = 0;
+
+        function initAudio() {
+            if (!audioCtx) {
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            }
+        }
+
+        function startBgMusic() {
+            if (audioMuted || !gameActive || bgMusicActive) return;
+            initAudio();
+            if (!audioCtx) return;
+
+            if (audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
+
+            bgMusicActive = true;
+            beatCount = 0;
+
+            if (bgMusicInterval) clearInterval(bgMusicInterval);
+            bgMusicInterval = setInterval(() => {
+                if (!gameActive || isPaused || gameOver || audioMuted) return;
+
+                try {
+                    const now = audioCtx.currentTime;
+                    const osc = audioCtx.createOscillator();
+                    const gain = audioCtx.createGain();
+                    osc.connect(gain);
+                    gain.connect(audioCtx.destination);
+
+                    osc.type = 'triangle'; // pleasant soft cartoon melody bubble
+
+                    const cartoonNotes = [261.63, 293.66, 329.63, 349.23, 392.00, 440.00, 493.88, 523.25];
+                    const melody = [0, 2, 4, 2, 5, 4, 7, 5, 1, 3, 5, 3, 6, 5, 7, 6];
+                    const noteIdx = melody[beatCount % melody.length];
+                    let freq = cartoonNotes[noteIdx];
+
+                    osc.frequency.setValueAtTime(freq, now);
+                    if (beatCount % 4 === 1) {
+                        osc.frequency.exponentialRampToValueAtTime(freq * 1.4, now + 0.22);
+                    } else if (beatCount % 4 === 3) {
+                        osc.frequency.exponentialRampToValueAtTime(freq * 0.75, now + 0.22);
+                    }
+
+                    gain.gain.setValueAtTime(0.04, now);
+                    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.22);
+
+                    osc.start(now);
+                    osc.stop(now + 0.22);
+
+                    // Cute soft cartoon "plop" percussion on every beat
+                    const drumOsc = audioCtx.createOscillator();
+                    const drumGain = audioCtx.createGain();
+                    drumOsc.connect(drumGain);
+                    drumGain.connect(audioCtx.destination);
+                    drumOsc.type = 'sine';
+                    drumOsc.frequency.setValueAtTime(beatCount % 2 === 0 ? 85 : 125, now);
+                    drumOsc.frequency.exponentialRampToValueAtTime(35, now + 0.08);
+                    drumGain.gain.setValueAtTime(0.02, now);
+                    drumGain.gain.exponentialRampToValueAtTime(0.001, now + 0.08);
+                    drumOsc.start(now);
+                    drumOsc.stop(now + 0.08);
+
+                    beatCount++;
+                } catch (e) {
+                    console.warn('Background track update error', e);
+                }
+            }, 250); // pleasant bounce tempo
+        }
+
+        function stopBgMusic() {
+            if (bgMusicInterval) {
+                clearInterval(bgMusicInterval);
+                bgMusicInterval = null;
+            }
+            bgMusicActive = false;
+        }
+
+        function playSound(type) {
+            if (audioMuted) return;
+            initAudio();
+            if (!audioCtx) return;
+            try {
+                const now = audioCtx.currentTime;
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+
+                if (type === 'shoot') {
+                    // Silly pop-squeak cartoon slide
+                    osc.type = 'triangle';
+                    const baseFreq = 180 + Math.random() * 80;
+                    osc.frequency.setValueAtTime(baseFreq, now);
+                    osc.frequency.exponentialRampToValueAtTime(baseFreq * 4.2, now + 0.12);
+                    gain.gain.setValueAtTime(0.06, now);
+                    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.12);
+                    osc.start(now);
+                    osc.stop(now + 0.12);
+                } else if (type === 'hit') {
+                    // Cute short "splat"
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(600, now);
+                    osc.frequency.exponentialRampToValueAtTime(100, now + 0.08);
+                    gain.gain.setValueAtTime(0.07, now);
+                    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.08);
+                    osc.start(now);
+                    osc.stop(now + 0.08);
+                } else if (type === 'explosion') {
+                    // Goofy springy whistle slide crash
+                    osc.type = 'sawtooth';
+                    osc.frequency.setValueAtTime(800, now);
+                    osc.frequency.exponentialRampToValueAtTime(80, now + 0.25);
+                    gain.gain.setValueAtTime(0.12, now);
+                    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.25);
+                    osc.start(now);
+                    osc.stop(now + 0.25);
+                } else if (type === 'math-success') {
+                    // Silly retro chirp
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(600, now);
+                    osc.frequency.setValueAtTime(850, now + 0.06);
+                    osc.frequency.setValueAtTime(1100, now + 0.12);
+                    gain.gain.setValueAtTime(0.08, now);
+                    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.25);
+                    osc.start(now);
+                    osc.stop(now + 0.25);
+                } else if (type === 'math-fail') {
+                    // Comic slide down
+                    osc.type = 'sawtooth';
+                    osc.frequency.setValueAtTime(180, now);
+                    osc.frequency.linearRampToValueAtTime(90, now + 0.3);
+                    gain.gain.setValueAtTime(0.12, now);
+                    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.3);
+                    osc.start(now);
+                    osc.stop(now + 0.3);
+                } else if (type === 'wipe') {
+                    osc.type = 'sawtooth';
+                    osc.frequency.setValueAtTime(120, now);
+                    osc.frequency.exponentialRampToValueAtTime(1500, now + 0.8);
+                    gain.gain.setValueAtTime(0.2, now);
+                    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.8);
+                    osc.start(now);
+                    osc.stop(now + 0.8);
+                }
+            } catch (e) {
+                console.warn('Silly synth effect generation failed', e);
+            }
+        }
+
+        // === STREAMING_CHUNK: Initializing game configurations... ===
+        const canvas = document.getElementById('game-canvas');
+        const ctx = canvas.getContext('2d');
+
+        function resizeCanvas() {
+            canvas.width = 800;
+            canvas.height = 600;
+        }
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
+
+        let gameActive = false;
+        let gameOver = false;
+        let isPaused = false;
+        let isAFK = false;
+        let selectedClass = 'engineer';
+        let currentDifficulty = 'medium'; // easy, medium, hard
+        let audioMuted = false;
+
+        let score = 0;
+        let kills = 0;
+        let scrap = 150;
+        let wave = 1;
+        let monstersKilledTotal = 0;
+        let mathStreaksTotal = 0;
+
+        // OMNI-SHOOT & AFK COOLDOWN CONTROL LOCKOUT VARIABLES
+        let omniShoot = false;
+        let omniAfkLockTimer = 0; // Ticks for 10-second pause constraint (600 frames)
+        let omniShootTimeRemaining = 0; // Remaining active time (1800 frames = 30 sec)
+
+        // Entities arrays
+        let monsters = [];
+        let bullets = [];
+        let turrets = [];
+        let particles = [];
+        let floatingTexts = [];
+
+        // Player structures with personal Armor properties
+        let player = {
+            x: 400,
+            y: 300,
+            radius: 18,
+            speed: 4,
+            angle: 0,
+            hp: 100,
+            maxHp: 100,
+            cooldown: 0,
+            maxCooldown: 12,
+            damage: 15,
+            shieldActive: false,
+            shieldHp: 0
+        };
+
+        let clientPlayer = {
+            active: false,
+            x: 0,
+            y: 0,
+            angle: 0,
+            hp: 0,
+            maxHp: 100,
+            selectedClass: 'engineer'
+        };
+
+        // Building Slots
+        const turretSlots = [
+            { x: 150, y: 180, turret: null, hovered: false, active: true },
+            { x: 300, y: 150, turret: null, hovered: false, active: true },
+            { x: 500, y: 150, turret: null, hovered: false, active: true },
+            { x: 650, y: 180, turret: null, hovered: false, active: true },
+            { x: 120, y: 350, turret: null, hovered: false, active: true },
+            { x: 680, y: 350, turret: null, hovered: false, active: true },
+            { x: 220, y: 450, turret: null, hovered: false, active: true },
+            { x: 580, y: 450, turret: null, hovered: false, active: true }
+        ];
+
+        let pendingTurretType = null;
+        let baseHp = 100;
+        const maxBaseHp = 100;
+        let baseShieldActive = false;
+        let baseShieldHp = 0;
+
+        // Wave tracking
+        let spawnCooldown = 120;
+        let currentWaveSpawnsLeft = 10;
+        let totalMonstersThisWave = 10;
+        let isWaveActive = false;
+
+        // CONTINUOUS MATH ENGINE VARIABLES
+        let currentQuestion = null;
+        let mathTimer = 20;
+        const mathTimerMax = 20;
+        let mathTimerInterval = null;
+        let consecutiveCorrect = 0;
+        let wrongAnswers = 0;
+        let unansweredCount = 0;
+        let kidMode = false;
+        let nextQuestionTimeout = null;
+
+        // MULTIPLAYER NETWORKING (PEERJS)
+        let peer = null;
+        let conn = null;
+        let isHost = true;
+        let isMultiplayer = false;
+
+        // Keyboard setup
+        const keys = {};
+        window.addEventListener('keydown', (e) => {
+            keys[e.key.toLowerCase()] = true;
+            if (e.key.toLowerCase() === 'p') togglePauseGame();
+            if (e.key.toLowerCase() === 'o') toggleOmniShoot();
+        });
+        window.addEventListener('keyup', (e) => {
+            keys[e.key.toLowerCase()] = false;
+        });
+
+        // Mouse/Touch aiming override
+        let targetX = null;
+        let targetY = null;
+        canvas.addEventListener('mousemove', (e) => {
+            const rect = canvas.getBoundingClientRect();
+            targetX = ((e.clientX - rect.left) / rect.width) * canvas.width;
+            targetY = ((e.clientY - rect.top) / rect.height) * canvas.height;
+        });
+        canvas.addEventListener('mousedown', (e) => {
+            const rect = canvas.getBoundingClientRect();
+            targetX = ((e.clientX - rect.left) / rect.width) * canvas.width;
+            targetY = ((e.clientY - rect.top) / rect.height) * canvas.height;
+            player.cooldown = 0;
+        });
+
+        // Touch Joystick implementation for mobile devices
+        const joystickContainer = document.getElementById('joystick-container');
+        const joystickHandle = document.getElementById('joystick-handle');
+        let stickActive = false;
+        let joystickX = 0;
+        let joystickY = 0;
+
+        if (joystickContainer) {
+            joystickContainer.addEventListener('touchstart', (e) => {
+                stickActive = true;
+                handleJoystickMove(e.targetTouches[0]);
+            }, { passive: true });
+            window.addEventListener('touchmove', (e) => {
+                if (stickActive && e.targetTouches[0]) {
+                    handleJoystickMove(e.targetTouches[0]);
+                }
+            }, { passive: true });
+            window.addEventListener('touchend', () => {
+                stickActive = false;
+                joystickX = 0;
+                joystickY = 0;
+                joystickHandle.style.transform = 'translate(0, 0)';
+            });
+        }
+
+        function handleJoystickMove(touch) {
+            const rect = joystickContainer.getBoundingClientRect();
+            const cx = rect.left + rect.width / 2;
+            const cy = rect.top + rect.height / 2;
+            let dx = touch.clientX - cx;
+            let dy = touch.clientY - cy;
+            const dist = Math.sqrt(dx * dx + dy * dy);
+            const maxDist = rect.width / 2;
+
+            if (dist > maxDist) {
+                dx = (dx / dist) * maxDist;
+                dy = (dy / dist) * maxDist;
+            }
+
+            joystickHandle.style.transform = `translate(${dx}px, ${dy}px)`;
+            joystickX = dx / maxDist;
+            joystickY = dy / maxDist;
+        }
+
+        canvas.addEventListener('click', (e) => {
+            const rect = canvas.getBoundingClientRect();
+            const clickX = ((e.clientX - rect.left) / rect.width) * canvas.width;
+            const clickY = ((e.clientY - rect.top) / rect.height) * canvas.height;
+
+            if (pendingTurretType) {
+                for (let slot of turretSlots) {
+                    const dist = Math.hypot(slot.x - clickX, slot.y - clickY);
+                    if (dist < 25) {
+                        if (slot.turret === null) {
+                            placeTurret(slot, pendingTurretType);
+                            return;
+                        }
+                    }
+                }
+            } else {
+                for (let slot of turretSlots) {
+                    if (slot.turret) {
+                        const dist = Math.hypot(slot.x - clickX, slot.y - clickY);
+                        if (dist < 22) {
+                            buyTurretUpgrade(slot.turret);
+                            return;
+                        }
+                    }
+                }
+            }
+        });
+
+        canvas.addEventListener('mousemove', (e) => {
+            const rect = canvas.getBoundingClientRect();
+            const cx = ((e.clientX - rect.left) / rect.width) * canvas.width;
+            const cy = ((e.clientY - rect.top) / rect.height) * canvas.height;
+            for (let slot of turretSlots) {
+                const dist = Math.hypot(slot.x - cx, slot.y - cy);
+                slot.hovered = (dist < 25);
+            }
+        });
+
+        // === CLASSES & PARTICLE GENERATORS ===
+        class Particle {
+            constructor(x, y, color, size, vx, vy, maxLife) {
+                this.x = x;
+                this.y = y;
+                this.color = color;
+                this.size = size || Math.random() * 3 + 2;
+                this.vx = vx || (Math.random() - 0.5) * 4;
+                this.vy = vy || (Math.random() - 0.5) * 4;
+                this.life = maxLife || Math.random() * 30 + 15;
+                this.maxLife = this.life;
+            }
+            update() {
+                this.x += this.vx;
+                this.y += this.vy;
+                this.life--;
+            }
+            draw() {
+                ctx.save();
+                ctx.globalAlpha = Math.max(0, this.life / this.maxLife);
+                ctx.fillStyle = this.color;
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.restore();
+            }
+        }
+
+        class FloatingText {
+            constructor(x, y, text, color, size) {
+                this.x = x;
+                this.y = y;
+                this.text = text;
+                this.color = color;
+                this.size = size || 14;
+                this.life = 45;
+                this.vy = -1;
+            }
+            update() {
+                this.y += this.vy;
+                this.life--;
+            }
+            draw() {
+                ctx.save();
+                ctx.globalAlpha = Math.max(0, this.life / 45);
+                ctx.font = `bold ${this.size}px 'Fredoka', sans-serif`;
+                ctx.fillStyle = this.color;
+                ctx.shadowColor = '#000000';
+                ctx.shadowBlur = 4;
+                ctx.textAlign = 'center';
+                ctx.fillText(this.text, this.x, this.y);
+                ctx.restore();
+            }
+        }
+
+        // === GAME SETUP & MENU ACTIONS ===
+        function selectClass(className) {
+            selectedClass = className;
+            document.querySelectorAll('.class-btn').forEach(btn => {
+                btn.classList.remove('border-indigo-500', 'bg-indigo-900');
+                btn.classList.add('border-slate-700', 'bg-slate-900/60');
+            });
+            const activeBtn = document.getElementById(`class-${className}`);
+            if (activeBtn) {
+                activeBtn.classList.remove('border-slate-700', 'bg-slate-900/60');
+                activeBtn.classList.add('border-indigo-500', 'bg-indigo-900');
+            }
+
+            if (className === 'gunner') {
+                player.maxCooldown = 8;
+                player.speed = 4;
+                player.damage = 15;
+            } else if (className === 'engineer') {
+                player.maxCooldown = 12;
+                player.speed = 3.6;
+                player.damage = 15;
+            } else if (className === 'medic') {
+                player.maxCooldown = 12;
+                player.speed = 4.2;
+                player.damage = 15;
+            } else if (className === 'commando') {
+                player.maxCooldown = 11;
+                player.speed = 4;
+                player.damage = 22;
+            }
+        }
+
+        function selectDifficulty(diff) {
+            currentDifficulty = diff;
+            document.querySelectorAll('.diff-btn').forEach(btn => {
+                btn.classList.remove('border-indigo-500', 'bg-indigo-900');
+                btn.classList.add('border-slate-700', 'bg-slate-900/60');
+            });
+            const activeBtn = document.getElementById(`diff-${diff}`);
+            if (activeBtn) {
+                activeBtn.classList.remove('border-slate-700', 'bg-slate-900/60');
+                activeBtn.classList.add('border-indigo-500', 'bg-indigo-900');
+            }
+        }
+
+        function toggleKidMode() {
+            const check = document.getElementById('kid-mode-toggle');
+            kidMode = check ? check.checked : false;
+        }
+
+        function triggerLockoutPause() {
+            omniShoot = false;
+            isAFK = false;
+            omniAfkLockTimer = 600; // 10 seconds lockout at 60fps
+            floatingTexts.push(new FloatingText(player.x, player.y - 15, "WEAPON OVERHEAT! COOLDOWN!", "#f43f5e", 18));
+            playSound('math-fail');
+            updateTogglesUI();
+        }
+
+        function toggleOmniShoot() {
+            if (!gameActive || gameOver || isPaused) return;
+            if (omniAfkLockTimer > 0) {
+                floatingTexts.push(new FloatingText(player.x, player.y - 10, "Weapons Cooling Down!", "#f43f5e", 12));
+                return;
+            }
+
+            omniShoot = !omniShoot;
+            if (omniShoot) {
+                omniShootTimeRemaining = 1800; // 30 seconds
+                floatingTexts.push(new FloatingText(player.x, player.y - 10, "OMNI-SHOOT CHARGED!", "#fbbf24", 16));
+                playSound('wipe');
+            }
+            updateTogglesUI();
+        }
+
+        function toggleAFKMode() {
+            if (!gameActive || gameOver || isPaused) return;
+            if (omniAfkLockTimer > 0) {
+                floatingTexts.push(new FloatingText(player.x, player.y - 10, "Weapons Cooling Down!", "#f43f5e", 12));
+                return;
+            }
+
+            isAFK = !isAFK;
+            updateTogglesUI();
+        }
+
+        function updateTogglesUI() {
+            const btn = document.getElementById('omni-shoot-btn');
+            const status = document.getElementById('omni-status');
+            const mobileBtn = document.getElementById('mobile-omni-btn');
+            const mobileStatus = document.getElementById('mobile-omni-status');
+
+            const afkBtn = document.getElementById('afk-mode-btn');
+            const afkStatus = document.getElementById('afk-status');
+            const mobileAfkBtn = document.getElementById('mobile-afk-btn');
+            const mobileAfkStatus = document.getElementById('mobile-afk-status');
+
+            const lockSeconds = Math.ceil(omniAfkLockTimer / 60);
+
+            if (omniAfkLockTimer > 0) {
+                const lockoutText = `LOCK ${lockSeconds}s`;
+                // Set Omni Locked UI
+                if (status) status.textContent = lockoutText;
+                if (btn) btn.className = "flex-grow rounded-xl py-2 px-3 text-[10px] font-bold uppercase transition flex items-center justify-center gap-1.5 bg-red-950 text-red-500 border border-red-900 cursor-not-allowed";
+                if (mobileStatus) mobileStatus.textContent = lockoutText;
+                if (mobileBtn) mobileBtn.className = "bg-red-950 text-red-500 border border-red-900 rounded-2xl py-3 px-4 text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-2 shadow-lg cursor-not-allowed";
+
+                // Set AFK Locked UI
+                if (afkStatus) afkStatus.textContent = lockoutText;
+                if (afkBtn) afkBtn.className = "flex-grow rounded-xl py-2 px-3 text-[10px] font-bold uppercase transition flex items-center justify-center gap-1.5 bg-red-950 text-red-500 border border-red-900 cursor-not-allowed";
+                if (mobileAfkStatus) mobileAfkStatus.textContent = lockoutText;
+                if (mobileAfkBtn) mobileAfkBtn.className = "bg-red-950 text-red-500 border border-red-900 rounded-2xl py-3 px-4 text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-2 shadow-lg cursor-not-allowed";
+                return;
+            }
+
+            // Normal Omni rendering
+            if (status) status.textContent = omniShoot ? "30s ACTIVE" : "OFF";
+            if (btn) {
+                btn.className = omniShoot 
+                    ? "flex-grow rounded-xl py-2 px-3 text-xs font-bold uppercase transition flex items-center justify-center gap-1.5 bg-rose-600 text-white border-rose-400 animate-pulse" 
+                    : "flex-grow rounded-xl py-2 px-3 text-xs font-bold uppercase transition flex items-center justify-center gap-1.5 bg-slate-900 text-indigo-400 border border-indigo-900/50";
+            }
+            if (mobileStatus) mobileStatus.textContent = omniShoot ? "ACTIVE" : "OFF";
+            if (mobileBtn) {
+                mobileBtn.className = omniShoot 
+                    ? "bg-rose-600 text-white border border-rose-400 rounded-2xl py-3 px-4 text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-2 shadow-lg transition-all duration-150 animate-pulse" 
+                    : "bg-slate-900 text-indigo-400 border border-indigo-900/50 rounded-2xl py-3 px-4 text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-2 shadow-lg transition-all duration-150";
+            }
+
+            // Normal AFK rendering
+            if (afkStatus) afkStatus.textContent = isAFK ? "ON" : "OFF";
+            if (afkBtn) {
+                afkBtn.className = isAFK 
+                    ? "flex-grow rounded-xl py-2 px-3 text-xs font-bold uppercase transition flex items-center justify-center gap-1.5 bg-emerald-600 text-white border border-emerald-400" 
+                    : "flex-grow rounded-xl py-2 px-3 text-xs font-bold uppercase transition flex items-center justify-center gap-1.5 bg-slate-900 text-indigo-400 border border-indigo-900/50";
+            }
+            if (mobileAfkStatus) mobileAfkStatus.textContent = isAFK ? "ON" : "OFF";
+            if (mobileAfkBtn) {
+                mobileAfkBtn.className = isAFK 
+                    ? "bg-emerald-600 text-white border border-emerald-400 rounded-2xl py-3 px-4 text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-2 shadow-lg transition-all duration-150" 
+                    : "bg-slate-900 text-indigo-400 border border-indigo-900/50 rounded-2xl py-3 px-4 text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-2 shadow-lg transition-all duration-150";
+            }
+        }
+
+        function togglePauseGame() {
+            isPaused = !isPaused;
+            floatingTexts.push(new FloatingText(400, 260, isPaused ? "SYSTEM PAUSED" : "RESUMED", "#3b82f6", 24));
+            if (isPaused) {
+                stopBgMusic();
+            } else {
+                startBgMusic();
+            }
+        }
+
+        function toggleAudioMute() {
+            audioMuted = !audioMuted;
+            const icon = document.getElementById('audio-mute-icon');
+            if (icon) {
+                if (audioMuted) {
+                    icon.className = 'fa-solid fa-volume-xmark';
+                    stopBgMusic();
+                } else {
+                    icon.className = 'fa-solid fa-volume-high';
+                    startBgMusic();
+                }
+            }
+        }
+
+        function toggleAboutModal(show) {
+            const modal = document.getElementById('about-modal');
+            if (modal) {
+                if (show) modal.classList.remove('hidden');
+                else modal.classList.add('hidden');
+            }
+        }
+
+        function startMathTimer() {
+            if (mathTimerInterval) clearInterval(mathTimerInterval);
+            mathTimerInterval = setInterval(() => {
+                if (!gameActive || isPaused || gameOver) return;
+                if (isMultiplayer && !isHost) return;
+
+                mathTimer--;
+                if (mathTimer <= 0) {
+                    handleMathTimeout();
+                }
+            }, 1000);
+        }
+
+        function launchGame() {
+            toggleKidMode();
+            document.getElementById('home-screen').classList.add('hidden');
+            document.getElementById('room-info-badge').classList.add('hidden');
+            restartGame();
+        }
+
+        function restartGame() {
+            monsters = [];
+            bullets = [];
+            particles = [];
+            floatingTexts = [];
+            turrets = [];
+            turretSlots.forEach(s => s.turret = null);
+
+            score = 0;
+            scrap = 150;
+            wave = 1;
+            kills = 0;
+            monstersKilledTotal = 0;
+            mathStreaksTotal = 0;
+            baseHp = 100;
+            baseShieldActive = false;
+            baseShieldHp = 0;
+
+            player.hp = player.maxHp;
+            player.x = 400;
+            player.y = 300;
+            player.shieldActive = false;
+            player.shieldHp = 0;
+
+            gameActive = true;
+            gameOver = false;
+            isPaused = false;
+            
+            consecutiveCorrect = 0;
+            wrongAnswers = 0;
+            unansweredCount = 0;
+
+            omniShoot = false;
+            omniAfkLockTimer = 0;
+            omniShootTimeRemaining = 0;
+            updateTogglesUI();
+            updateArmorHUD();
+            
+            document.getElementById('game-over-screen').classList.add('hidden');
+            document.getElementById('leaderboard-submit-box').classList.remove('hidden');
+            const submitBtn = document.getElementById('btn-submit-score');
+            if (submitBtn) {
+                submitBtn.disabled = false;
+                submitBtn.textContent = "Submit";
+            }
+            updateUI();
+
+            generateMathQuestion();
+            startMathTimer();
+            startNewWave();
+            startBgMusic();
+        }
+
+        function goHome() {
+            gameActive = false;
+            stopBgMusic();
+            if (mathTimerInterval) clearInterval(mathTimerInterval);
+            document.getElementById('game-over-screen').classList.add('hidden');
+            document.getElementById('home-screen').classList.remove('hidden');
+        }
+
+        // === STREAMING_CHUNK: Managing spawn algorithms... ===
+        function startNewWave() {
+            isWaveActive = true;
+            totalMonstersThisWave = 8 + wave * 4;
+            currentWaveSpawnsLeft = totalMonstersThisWave;
+            spawnCooldown = 30;
+            floatingTexts.push(new FloatingText(400, 240, `WAVE ${wave} INITIATED`, "#f59e0b", 22));
+            playSound('wipe');
+        }
+
+        function spawnMonster() {
+            if (!gameActive || gameOver || isPaused) return;
+            if (isMultiplayer && !isHost) return;
+
+            function createMonsterAtSide(side, typeOverride) {
+                let type = typeOverride || 'normal';
+                let roll = Math.random();
+                if (!typeOverride) {
+                    if (wave >= 2 && roll < 0.2) type = 'speedy';
+                    else if (wave >= 3 && roll < 0.35) type = 'tank';
+                    else if (wave >= 5 && roll < 0.45) type = 'boss';
+                }
+
+                let hp = 30 + wave * 12;
+                let maxHp = hp;
+                let speed = 1.0 + wave * 0.12;
+                let radius = 15;
+                let color = '#ec4899'; // Playful candy pink
+                let scrapValue = 10 + wave * 2;
+
+                if (type === 'speedy') {
+                    hp = 20 + wave * 7;
+                    maxHp = hp;
+                    speed = 2.4 + wave * 0.18;
+                    radius = 12;
+                    color = '#f59e0b'; // Goofy orange
+                } else if (type === 'tank') {
+                    hp = 85 + wave * 30;
+                    maxHp = hp;
+                    speed = 0.7 + wave * 0.05;
+                    radius = 22;
+                    color = '#8b5cf6'; // Playful purple
+                } else if (type === 'boss') {
+                    hp = 250 + wave * 120;
+                    maxHp = hp;
+                    speed = 0.5 + wave * 0.03;
+                    radius = 30;
+                    color = '#06b6d4'; // Bright cyan balloon
+                    scrapValue = 50;
+                }
+
+                // Wave 1-3 Difficulty Modifiers: Slower speed, larger radius, and high HP
+                if (wave <= 3) {
+                    speed *= 0.45;                
+                    radius *= 2.0;               
+                    hp = Math.floor(hp * 2.5);   
+                    maxHp = hp;
+                }
+
+                // Apply Game Difficulty Speed scaling
+                let speedMult = 1.0;
+                if (currentDifficulty === 'easy') {
+                    speedMult = 0.55; 
+                } else if (currentDifficulty === 'hard') {
+                    speedMult = 1.45; 
+                }
+                speed *= speedMult;
+
+                let x, y;
+                if (side === 0) { // Top
+                    x = Math.random() * canvas.width;
+                    y = -20;
+                } else if (side === 1) { // Right
+                    x = canvas.width + 20;
+                    y = Math.random() * canvas.height;
+                } else if (side === 2) { // Bottom
+                    x = Math.random() * canvas.width;
+                    y = canvas.height + 20;
+                } else { // Left
+                    x = -20;
+                    y = Math.random() * canvas.height;
+                }
+
+                const funnyFirst = ['Poopy', 'Farty', 'Snotty', 'Giggle', 'Burp', 'Wiggle', 'Bubbles', 'Toot', 'Booger', 'Squeaky', 'Silly', 'Slimy', 'Goofy', 'Wobbly'];
+                const funnySecond = ['boy', 'pants', 'saurus', 'puff', 'pot', 'gobbler', 'face', 'socks', 'wiggle', 'doodle', 'monster', 'muffin', 'splash'];
+                const generatedName = funnyFirst[Math.floor(Math.random() * funnyFirst.length)] + ' ' + funnySecond[Math.floor(Math.random() * funnySecond.length)];
+
+                monsters.push({
+                    id: Math.random().toString(36).substring(2, 9),
+                    x,
+                    y,
+                    hp,
+                    maxHp,
+                    speed,
+                    radius,
+                    color,
+                    type,
+                    scrapValue,
+                    name: generatedName,
+                    wiggleOffset: Math.random() * 100
+                });
+            }
+
+            if (wave > 3) {
+                for (let direction = 0; direction < 4; direction++) {
+                    createMonsterAtSide(direction);
+                    currentWaveSpawnsLeft--;
+                }
+                if (Math.random() < 0.75) {
+                    createMonsterAtSide(Math.floor(Math.random() * 4), 'tank');
+                    currentWaveSpawnsLeft--;
+                }
+            } else {
+                createMonsterAtSide(Math.floor(Math.random() * 4));
+                currentWaveSpawnsLeft--;
+            }
+        }
+
+        // === STREAMING_CHUNK: Managing calculations engine and streak armor... ===
+        function generateMathQuestion() {
+            if (!gameActive || gameOver) return;
+
+            let num1 = 0, num2 = 0;
+            let op = '+';
+            let operators = ['+'];
+
+            if (!kidMode) {
+                if (wave >= 2) operators.push('-');
+                if (wave >= 3) operators.push('*');
+                if (wave >= 5) operators.push('/');
+            }
+
+            op = operators[Math.floor(Math.random() * operators.length)];
+
+            if (op === '+') {
+                num1 = Math.floor(Math.random() * 20) + (kidMode ? 1 : 5) * wave;
+                num2 = Math.floor(Math.random() * 20) + (kidMode ? 1 : 3) * wave;
+            } else if (op === '-') {
+                num1 = Math.floor(Math.random() * 25) + 6 * wave;
+                num2 = Math.floor(Math.random() * num1);
+            } else if (op === '*') {
+                num1 = Math.floor(Math.random() * 8) + wave;
+                num2 = Math.floor(Math.random() * 9) + 2;
+            } else if (op === '/') {
+                num2 = Math.floor(Math.random() * 8) + 2;
+                let target = Math.floor(Math.random() * 8) + 2;
+                num1 = num2 * target;
+            }
+
+            let correctVal = 0;
+            if (op === '+') correctVal = num1 + num2;
+            else if (op === '-') correctVal = num1 - num2;
+            else if (op === '*') correctVal = num1 * num2;
+            else if (op === '/') correctVal = num1 / num2;
+
+            let options = new Set();
+            options.add(correctVal);
+
+            while (options.size < 4) {
+                let off = Math.floor(Math.random() * 10) - 5;
+                if (off === 0) off = Math.floor(Math.random() * 5) + 1;
+                options.add(correctVal + off);
+            }
+
+            const sortedOptions = Array.from(options).sort((a, b) => a - b);
+            const correctIdx = sortedOptions.indexOf(correctVal);
+            const isBonus = Math.random() < 0.08;
+
+            currentQuestion = {
+                question: `${num1} ${op} ${num2} = ?`,
+                options: sortedOptions,
+                correct: correctIdx,
+                isBonus: isBonus
+            };
+
+            mathTimer = 20;
+
+            if (isMultiplayer && isHost) {
+                sendGameState();
+            }
+
+            renderMathQuestion();
+        }
+
+        function renderMathQuestion() {
+            const mathQuestionText = document.getElementById('math-question-text');
+            const mathOptionsGrid = document.getElementById('math-options-grid');
+            const mathStreakVal = document.getElementById('math-streak-val');
+            const mathStreakBadge = document.getElementById('math-streak-badge');
+
+            if (!currentQuestion) {
+                mathQuestionText.innerHTML = '<span class="text-indigo-300 italic text-xs">Awaiting next puzzle threat...</span>';
+                mathOptionsGrid.innerHTML = '';
+                return;
+            }
+
+            if (consecutiveCorrect > 0) {
+                mathStreakVal.textContent = consecutiveCorrect;
+                mathStreakBadge.classList.remove('hidden');
+            } else {
+                mathStreakBadge.classList.add('hidden');
+            }
+
+            let qHtml = currentQuestion.question;
+            if (currentQuestion.isBonus) {
+                qHtml = `<span class="text-amber-400 font-extrabold animate-pulse"><i class="fa-solid fa-gem mr-1"></i>BONUS:</span> ` + qHtml;
+            }
+            mathQuestionText.innerHTML = qHtml;
+
+            mathOptionsGrid.innerHTML = '';
+            currentQuestion.options.forEach((opt, idx) => {
+                const btn = document.createElement('button');
+                btn.className = `w-full py-2 px-3 rounded-xl border-2 font-bold text-sm transition-all duration-150 transform hover:scale-[1.02] active:scale-95 flex justify-between items-center ${
+                    currentQuestion.isBonus 
+                    ? 'bg-amber-950/40 border-amber-500/50 hover:border-amber-400 text-amber-200 hover:bg-amber-900/40' 
+                    : 'bg-slate-900/60 border-indigo-500/30 hover:border-indigo-400 text-indigo-100 hover:bg-indigo-950/40'
+                }`;
+                btn.innerHTML = `
+                    <span>${opt}</span>
+                    <span class="text-[10px] opacity-40 font-mono">#${idx + 1}</span>
+                `;
+                
+                btn.onclick = () => answerMath(idx);
+                mathOptionsGrid.appendChild(btn);
+            });
+        }
+
+        function answerMath(index) {
+            if (!currentQuestion || !gameActive || gameOver || isPaused) return;
+
+            if (isMultiplayer && !isHost) {
+                if (conn && conn.open) {
+                    conn.send({ type: 'answerMath', index: index });
+                }
+                return;
+            }
+
+            const isCorrect = (index === currentQuestion.correct);
+            if (isCorrect) {
+                consecutiveCorrect++;
+                unansweredCount = 0;
+                wrongAnswers = 0;
+
+                let reward = currentQuestion.isBonus ? 500 : 150;
+                scrap += reward;
+                score += 100;
+                
+                playSound('math-success');
+                floatingTexts.push(new FloatingText(player.x, player.y - 10, `+${reward} Scrap`, '#fbbf24', 16));
+
+                // ARMOR SHIELD AND MONSTER WIPE: Just 3 correct answers triggers a complete shield & board wipe!
+                if (consecutiveCorrect >= 3) {
+                    triggerMonsterWipe();
+                    activateArmorBoost();
+                    mathStreaksTotal++;
+                    consecutiveCorrect = 0;
+                }
+            } else {
+                consecutiveCorrect = 0;
+                wrongAnswers++;
+                playSound('math-fail');
+                floatingTexts.push(new FloatingText(player.x, player.y - 10, "Wrong Answer!", "#ef4444", 16));
+
+                if (wrongAnswers >= 5) {
+                    destroyRandomTurret();
+                    wrongAnswers = 0;
+                }
+            }
+
+            updateUI();
+
+            if (nextQuestionTimeout) clearTimeout(nextQuestionTimeout);
+            nextQuestionTimeout = setTimeout(() => {
+                generateMathQuestion();
+            }, 300);
+
+            if (isMultiplayer && isHost) {
+                sendGameState();
+            }
+        }
+
+        function activateArmorBoost() {
+            // Personal & Base Shield Activation with 100 Armor Points
+            player.shieldActive = true;
+            player.shieldHp = 100;
+            baseShieldActive = true;
+            baseShieldHp = 100;
+
+            floatingTexts.push(new FloatingText(400, 340, "🛡️ ARMOR BOOST ACTIVED! 🛡️", "#22d3ee", 20));
+            
+            // Spawn protective shield sparkles around the base and player
+            for (let i = 0; i < 20; i++) {
+                particles.push(new Particle(400, 300, '#22d3ee', 4));
+                particles.push(new Particle(player.x, player.y, '#22d3ee', 3));
+            }
+            updateArmorHUD();
+        }
+
+        function updateArmorHUD() {
+            const badge = document.getElementById('armor-status-text');
+            if (badge) {
+                if (baseShieldActive && baseShieldHp > 0) {
+                    badge.innerHTML = `<i class="fa-solid fa-shield-halved animate-pulse"></i> Shield: ${baseShieldHp} AP`;
+                    badge.classList.remove('hidden');
+                } else {
+                    badge.classList.add('hidden');
+                }
+            }
+        }
+
+        function handleMathTimeout() {
+            if (isMultiplayer && !isHost) return;
+
+            unansweredCount++;
+            consecutiveCorrect = 0;
+            playSound('math-fail');
+            floatingTexts.push(new FloatingText(400, 260, "TIME OUT!", "#f43f5e", 18));
+
+            if (unansweredCount >= 3) {
+                destroyRandomTurret();
+                unansweredCount = 0;
+            }
+
+            if (nextQuestionTimeout) clearTimeout(nextQuestionTimeout);
+            nextQuestionTimeout = setTimeout(() => {
+                generateMathQuestion();
+            }, 300);
+
+            if (isMultiplayer && isHost) {
+                sendGameState();
+            }
+        }
+
+        function destroyRandomTurret() {
+            const builtTurrets = turretSlots.filter(s => s.turret !== null);
+            if (builtTurrets.length > 0) {
+                const targetSlot = builtTurrets[Math.floor(Math.random() * builtTurrets.length)];
+                if (targetSlot && targetSlot.turret) {
+                    const tx = targetSlot.turret.x;
+                    const ty = targetSlot.turret.y;
+                    
+                    for (let i = 0; i < 25; i++) {
+                        particles.push(new Particle(tx, ty, '#f97316'));
+                    }
+                    
+                    floatingTexts.push(new FloatingText(tx, ty - 20, "DEFENSE OVERLOADED!", "#ef4444", 15));
+                    playSound('explosion');
+                    targetSlot.turret = null;
+                }
+            } else {
+                baseHp = Math.max(0, baseHp - 20);
+                floatingTexts.push(new FloatingText(400, 300, "-20 Base Health", "#ef4444", 18));
+                if (baseHp <= 0) {
+                    triggerGameOver();
+                }
+            }
+            updateUI();
+        }
+
+        function triggerMonsterWipe() {
+            floatingTexts.push(new FloatingText(400, 200, "MONSTER WIPE CLEAR!", "#10b981", 24));
+            playSound('wipe');
+            monsters.forEach(m => {
+                for (let i = 0; i < 10; i++) {
+                    particles.push(new Particle(m.x, m.y, '#10b981', 4));
+                }
+                score += 50;
+            });
+            monsters = [];
+            updateUI();
+        }
+
+        // === ENGINEERING STATION ===
+        function buyGear(item) {
+            if (!gameActive || gameOver || isPaused) return;
+
+            let cost = 100;
+            if (item === 'turret-aoe') cost = 250;
+            else if (item === 'turret-rapid') cost = 200;
+            else if (item === 'turret-sniper') cost = 300;
+
+            if (scrap < cost) {
+                floatingTexts.push(new FloatingText(400, 500, "Insufficent Scrap!", "#ef4444", 14));
+                return;
+            }
+
+            pendingTurretType = item;
+            document.getElementById('placement-toolbar').classList.remove('hidden');
+        }
+
+        function cancelTurretPlacement() {
+            pendingTurretType = null;
+            document.getElementById('placement-toolbar').classList.add('hidden');
+        }
+
+        function placeTurret(slot, type) {
+            let cost = 100;
+            if (type === 'turret-aoe') cost = 250;
+            else if (type === 'turret-rapid') cost = 200;
+            else if (type === 'turret-sniper') cost = 300;
+
+            if (scrap < cost) return;
+
+            scrap -= cost;
+            slot.turret = {
+                x: slot.x,
+                y: slot.y,
+                type: type,
+                level: 1,
+                hp: selectedClass === 'engineer' ? 150 : 100,
+                maxHp: selectedClass === 'engineer' ? 150 : 100,
+                cooldown: 0,
+                range: type === 'turret-sniper' ? 320 : (type === 'turret-aoe' ? 150 : 200),
+                damage: type === 'turret-sniper' ? 50 : (type === 'turret-aoe' ? 20 : 12),
+                id: Math.random().toString(36).substring(2, 9)
+            };
+
+            floatingTexts.push(new FloatingText(slot.x, slot.y - 20, "Turret Assembled", "#10b981", 13));
+            playSound('math-success');
+            
+            pendingTurretType = null;
+            document.getElementById('placement-toolbar').classList.add('hidden');
+            updateUI();
+
+            if (isMultiplayer && isHost) {
+                sendGameState();
+            }
+        }
+
+        function buyTurretUpgrade(turret) {
+            const cost = turret.level * 120;
+            if (scrap < cost) {
+                floatingTexts.push(new FloatingText(turret.x, turret.y - 20, "Need " + cost + " Scrap", "#ef4444", 12));
+                return;
+            }
+
+            scrap -= cost;
+            turret.level += 1;
+            turret.damage = Math.floor(turret.damage * 1.5);
+            turret.range = Math.floor(turret.range * 1.15);
+            turret.maxHp = Math.floor(turret.maxHp * 1.3);
+            turret.hp = turret.maxHp;
+
+            floatingTexts.push(new FloatingText(turret.x, turret.y - 25, `Upgraded Lvl ${turret.level}!`, "#10b981", 14));
+            playSound('math-success');
+            updateUI();
+
+            if (isMultiplayer && isHost) {
+                sendGameState();
+            }
+        }
+
+        // === STREAMING_CHUNK: Managing network connections... ===
+        function hostGame() {
+            isMultiplayer = true;
+            isHost = true;
+            document.getElementById('home-screen').classList.add('hidden');
+            
+            const roomCode = Math.random().toString(36).substring(2, 7).toUpperCase();
+            document.getElementById('room-id-val').textContent = roomCode;
+            document.getElementById('room-info-badge').classList.remove('hidden');
+
+            peer = new Peer(roomCode);
+            peer.on('open', (id) => {
+                console.log('Room Host ready at ID:', id);
+            });
+
+            peer.on('connection', (connection) => {
+                setupConnection(connection);
+            });
+
+            restartGame();
+        }
+
+        function joinGame() {
+            isMultiplayer = true;
+            isHost = false;
+            const code = document.getElementById('join-room-id').value.trim().toUpperCase();
+            if (!code || code.length !== 5) {
+                return;
+            }
+
+            document.getElementById('room-id-val').textContent = code;
+            document.getElementById('room-info-badge').classList.remove('hidden');
+            document.getElementById('home-screen').classList.add('hidden');
+
+            const randomId = 'client-' + Math.random().toString(36).substring(2, 7);
+            peer = new Peer(randomId);
+
+            peer.on('open', () => {
+                const connection = peer.connect(code);
+                setupConnection(connection);
+            });
+        }
+
+        function setupConnection(connection) {
+            conn = connection;
+            conn.on('open', () => {
+                console.log('Peerjs tunnel open.');
+                clientPlayer.active = true;
+                restartGame();
+            });
+
+            conn.on('data', (data) => {
+                if (isHost) {
+                    if (data.type === 'clientUpdate') {
+                        clientPlayer.x = data.player.x;
+                        clientPlayer.y = data.player.y;
+                        clientPlayer.angle = data.player.angle;
+                        clientPlayer.hp = data.player.hp;
+                        clientPlayer.maxHp = data.player.maxHp;
+                        clientPlayer.selectedClass = data.player.selectedClass;
+                        
+                        if (data.isShooting) {
+                            spawnBullet(clientPlayer.x, clientPlayer.y, data.angle, '#ec4899');
+                        }
+                    } else if (data.type === 'answerMath') {
+                        answerMath(data.index);
+                    }
+                } else {
+                    if (data.type === 'sync') {
+                        scrap = data.scrap;
+                        wave = data.wave;
+                        score = data.score;
+                        baseHp = data.baseHp;
+                        gameOver = data.gameOver;
+                        
+                        player.x = data.hostPlayer.x;
+                        player.y = data.hostPlayer.y;
+                        player.angle = data.hostPlayer.angle;
+                        player.hp = data.hostPlayer.hp;
+                        
+                        monsters = data.monsters;
+                        bullets = data.bullets;
+                        turrets = data.turrets;
+                        currentQuestion = data.currentQuestion;
+                        mathTimer = data.mathTimer;
+                        consecutiveCorrect = data.consecutiveCorrect;
+
+                        turrets.forEach(t => {
+                            const slot = turretSlots.find(s => Math.hypot(s.x - t.x, s.y - t.y) < 20);
+                            if (slot) slot.turret = t;
+                        });
+
+                        renderMathQuestion();
+                        updateUI();
+                    }
+                }
+            });
+        }
+
+        function sendGameState() {
+            if (!isHost || !conn || !conn.open) return;
+            conn.send({
+                type: 'sync',
+                scrap,
+                wave,
+                score,
+                baseHp,
+                gameOver,
+                hostPlayer: { x: player.x, y: player.y, angle: player.angle, hp: player.hp },
+                monsters,
+                bullets,
+                turrets: turretSlots.filter(s => s.turret !== null).map(s => s.turret),
+                currentQuestion,
+                mathTimer,
+                consecutiveCorrect
+            });
+        }
+
+        function sendClientUpdate(isShooting) {
+            if (isHost || !conn || !conn.open) return;
+            conn.send({
+                type: 'clientUpdate',
+                player: { x: player.x, y: player.y, angle: player.angle, hp: player.hp, maxHp: player.maxHp, selectedClass: selectedClass },
+                isShooting: isShooting,
+                angle: player.angle
+            });
+        }
+
+        function copyRoomId() {
+            const val = document.getElementById('room-id-val').textContent;
+            if (val) {
+                const temp = document.createElement('textarea');
+                temp.value = val;
+                document.body.appendChild(temp);
+                temp.select();
+                document.execCommand('copy');
+                document.body.removeChild(temp);
+                floatingTexts.push(new FloatingText(400, 100, "COPIED!", "#3b82f6", 14));
+            }
+        }
+
+        // === GAME OVER LOGIC ===
+        function triggerGameOver() {
+            gameActive = false;
+            gameOver = true;
+            stopBgMusic();
+            document.getElementById('end-screen-title').textContent = "Base Defeated";
+            document.getElementById('end-wave-val').textContent = wave;
+            document.getElementById('end-kills-val').textContent = kills;
+            document.getElementById('end-math-streak-val').textContent = mathStreaksTotal;
+            document.getElementById('game-over-screen').classList.remove('hidden');
+        }
+
+        function updateUI() {
+            const scrapTxt = document.getElementById('hud-scrap');
+            if (scrapTxt) scrapTxt.textContent = scrap;
+
+            const baseHpTxt = document.getElementById('base-hp-text');
+            if (baseHpTxt) baseHpTxt.textContent = `${baseHp}/100`;
+
+            updateArmorHUD();
+        }
+
+        function spawnBullet(x, y, angle, color) {
+            const speed = 8;
+            bullets.push({
+                x: x,
+                y: y,
+                dx: Math.cos(angle) * speed,
+                dy: Math.sin(angle) * speed,
+                color: color || '#3b82f6',
+                radius: 4,
+                damage: player.damage
+            });
+            playSound('shoot');
+        }
+
+        // === STREAMING_CHUNK: Updating visual components loop with overheat checks... ===
+        function update() {
+            if (!gameActive || gameOver || isPaused) return;
+
+            // Handle Overheat system timer lockout pause
+            if (omniAfkLockTimer > 0) {
+                omniAfkLockTimer--;
+                if (omniAfkLockTimer === 0) {
+                    floatingTexts.push(new FloatingText(player.x, player.y - 15, "WEAPONS READY!", "#10b981", 16));
+                    playSound('math-success');
+                }
+                updateTogglesUI();
+                // Spawn cooling visual smoke steam elements rising from player character
+                if (Math.random() < 0.15) {
+                    particles.push(new Particle(player.x, player.y, 'rgba(255,255,255,0.4)', Math.random() * 2 + 1, (Math.random() - 0.5) * 1, -Math.random() * 2, 40));
+                }
+            }
+
+            // Omni Shoot Duration Timer limit
+            if (omniShoot) {
+                omniShootTimeRemaining--;
+                if (omniShootTimeRemaining <= 0) {
+                    triggerLockoutPause();
+                }
+            }
+
+            // Player mechanics
+            let dx = 0;
+            let dy = 0;
+
+            if (stickActive) {
+                dx = joystickX * player.speed;
+                dy = joystickY * player.speed;
+            } else {
+                if (keys['w'] || keys['arrowup']) dy = -player.speed;
+                if (keys['s'] || keys['arrowdown']) dy = player.speed;
+                if (keys['a'] || keys['arrowleft']) dx = -player.speed;
+                if (keys['d'] || keys['arrowright']) dx = player.speed;
+            }
+
+            player.x += dx;
+            player.y += dy;
+
+            player.x = Math.max(player.radius, Math.min(canvas.width - player.radius, player.x));
+            player.y = Math.max(player.radius, Math.min(canvas.height - player.radius, player.y));
+
+            if (targetX !== null && targetY !== null && !isAFK) {
+                player.angle = Math.atan2(targetY - player.y, targetX - player.x);
+            } else if (monsters.length > 0) {
+                let closest = null;
+                let minDist = 9999;
+                monsters.forEach(m => {
+                    const d = Math.hypot(m.x - player.x, m.y - player.y);
+                    if (d < minDist) {
+                        minDist = d;
+                        closest = m;
+                    }
+                });
+                if (closest) {
+                    player.angle = Math.atan2(closest.y - player.y, closest.x - player.x);
+                }
+            }
+
+            if (player.cooldown > 0) player.cooldown--;
+
+            // Firing conditions
+            let activeShooting = false;
+            if (player.cooldown <= 0 && omniAfkLockTimer <= 0) {
+                if (omniShoot) {
+                    for (let a = 0; a < Math.PI * 2; a += Math.PI / 6) {
+                        spawnBullet(player.x, player.y, a, '#38bdf8');
+                    }
+                    player.cooldown = 4; // Rapid continuous barraging
+                    activeShooting = true;
+                } else if (isAFK || (targetX !== null && targetY !== null)) {
+                    spawnBullet(player.x, player.y, player.angle, '#3b82f6');
+                    player.cooldown = player.maxCooldown;
+                    activeShooting = true;
+                }
+            }
+
+            if (isMultiplayer) {
+                if (isHost) sendGameState();
+                else sendClientUpdate(activeShooting);
+            }
+
+            if (selectedClass === 'medic' && Math.random() < 0.003) {
+                baseHp = Math.min(maxBaseHp, baseHp + 2);
+                updateUI();
+            }
+
+            // Continuous Threat Waves
+            if (isWaveActive) {
+                spawnCooldown--;
+                if (spawnCooldown <= 0 && currentWaveSpawnsLeft > 0) {
+                    spawnMonster();
+                    spawnCooldown = wave > 3 ? Math.max(8, 25 - wave * 2) : Math.max(30, 110 - wave * 10);
+                }
+
+                if (currentWaveSpawnsLeft <= 0 && monsters.length === 0) {
+                    isWaveActive = false;
+                    wave++;
+                    startNewWave();
+                    updateUI();
+                }
+            }
+
+            // Move & Resolve Monster Physics
+            if (!isMultiplayer || isHost) {
+                monsters.forEach((m, idx) => {
+                    const targetX = 400;
+                    const targetY = 300;
+                    const angle = Math.atan2(targetY - m.y, targetX - m.x);
+                    m.x += Math.cos(angle) * m.speed;
+                    m.y += Math.sin(angle) * m.speed;
+
+                    const distToBase = Math.hypot(400 - m.x, 300 - m.y);
+                    if (distToBase < m.radius + 20) {
+                        let baseDamage = (m.type === 'boss' ? 30 : 10);
+                        
+                        // Apply Shield Armor reduction absorption if available
+                        if (baseShieldActive && baseShieldHp > 0) {
+                            baseShieldHp = Math.max(0, baseShieldHp - baseDamage);
+                            floatingTexts.push(new FloatingText(m.x, m.y, `🛡️ BLOCKED!`, '#22d3ee', 14));
+                            playSound('hit');
+                            
+                            // Visual shield protective grid ripple sparks
+                            for (let i = 0; i < 15; i++) {
+                                particles.push(new Particle(400 + (Math.random()-0.5)*70, 300 + (Math.random()-0.5)*70, '#22d3ee'));
+                            }
+                            if (baseShieldHp <= 0) {
+                                baseShieldActive = false;
+                            }
+                        } else {
+                            // Deduct raw Base Defense HP
+                            baseHp = Math.max(0, baseHp - baseDamage);
+                            floatingTexts.push(new FloatingText(m.x, m.y, `-${baseDamage} HP`, '#f43f5e', 14));
+                            playSound('hit');
+                            for (let i = 0; i < 10; i++) {
+                                particles.push(new Particle(m.x, m.y, '#ef4444'));
+                            }
+                        }
+
+                        monsters.splice(idx, 1);
+                        updateUI();
+
+                        if (baseHp <= 0) {
+                            triggerGameOver();
+                        }
+                    }
+                });
+            }
+
+            // Update Bullets
+            bullets.forEach((b, idx) => {
+                b.x += b.dx;
+                b.y += b.dy;
+
+                if (b.x < 0 || b.x > canvas.width || b.y < 0 || b.y > canvas.height) {
+                    bullets.splice(idx, 1);
+                    return;
+                }
+
+                if (!isMultiplayer || isHost) {
+                    for (let mIdx = 0; mIdx < monsters.length; mIdx++) {
+                        const m = monsters[mIdx];
+                        const dist = Math.hypot(m.x - b.x, m.y - b.y);
+                        if (dist < m.radius + b.radius) {
+                            m.hp -= b.damage;
+                            bullets.splice(idx, 1);
+
+                            const sparkColors = ['#f472b6', '#38bdf8', '#fbbf24', '#a78bfa', '#34d399'];
+                            for (let i = 0; i < 6; i++) {
+                                particles.push(new Particle(b.x, b.y, sparkColors[Math.floor(Math.random() * sparkColors.length)], 2.5));
+                            }
+
+                            const goofyWords = ['BOOP!', 'TOOT!', 'SPLAT!', 'TICKLE!', 'SLIME!', 'GIGGLE!', 'SQUEAK!'];
+                            if (Math.random() < 0.4) {
+                                floatingTexts.push(new FloatingText(m.x, m.y - 15, goofyWords[Math.floor(Math.random() * goofyWords.length)], '#38bdf8', 12));
+                            }
+
+                            if (m.hp <= 0) {
+                                for (let i = 0; i < 15; i++) {
+                                    particles.push(new Particle(m.x, m.y, sparkColors[Math.floor(Math.random() * sparkColors.length)], Math.random() * 3.5 + 2));
+                                }
+
+                                scrap += m.scrapValue;
+                                score += 50;
+                                kills++;
+                                monstersKilledTotal++;
+                                playSound('hit');
+
+                                floatingTexts.push(new FloatingText(m.x, m.y - 10, `+${m.scrapValue} Scrap`, '#fbbf24', 12));
+                                monsters.splice(mIdx, 1);
+                                updateUI();
+                            }
+                            break;
+                        }
+                    }
+                }
+            });
+
+            // Update Built Turrets
+            turretSlots.forEach(slot => {
+                if (!slot.turret) return;
+                const t = slot.turret;
+
+                if (t.cooldown > 0) t.cooldown--;
+
+                let target = null;
+                let closestDist = t.range;
+                monsters.forEach(m => {
+                    const dist = Math.hypot(m.x - t.x, m.y - t.y);
+                    if (dist < closestDist) {
+                        closestDist = dist;
+                        target = m;
+                    }
+                });
+
+                if (target && t.cooldown <= 0) {
+                    if (t.type === 'turret-aoe') {
+                        t.cooldown = 45;
+                        playSound('shoot');
+                        
+                        monsters.forEach(m => {
+                            if (Math.hypot(m.x - t.x, m.y - t.y) < t.range) {
+                                m.hp -= t.damage;
+                                for (let i = 0; i < 5; i++) {
+                                    particles.push(new Particle(m.x, m.y, '#c084fc', 2));
+                                }
+                                if (m.hp <= 0) {
+                                    scrap += m.scrapValue;
+                                    score += 50;
+                                    kills++;
+                                    monsters.splice(monsters.indexOf(m), 1);
+                                    updateUI();
+                                }
+                            }
+                        });
+
+                        for (let a = 0; a < Math.PI * 2; a += Math.PI / 8) {
+                            particles.push(new Particle(t.x, t.y, '#c084fc', 3, Math.cos(a) * 4, Math.sin(a) * 4, 20));
+                        }
+                    } else {
+                        const angle = Math.atan2(target.y - t.y, target.x - t.x);
+                        const bColor = t.type === 'turret-rapid' ? '#f43f5e' : (t.type === 'turret-sniper' ? '#10b981' : '#3b82f6');
+                        
+                        bullets.push({
+                            x: t.x,
+                            y: t.y,
+                            dx: Math.cos(angle) * 7,
+                            dy: Math.sin(angle) * 7,
+                            color: bColor,
+                            radius: t.type === 'turret-sniper' ? 6 : 3,
+                            damage: t.damage
+                        });
+
+                        playSound('shoot');
+                        t.cooldown = t.type === 'turret-rapid' ? 5 : (t.type === 'turret-sniper' ? 90 : 25);
+                    }
+                }
+            });
+
+            particles.forEach((p, idx) => {
+                p.update();
+                if (p.life <= 0) particles.splice(idx, 1);
+            });
+
+            floatingTexts.forEach((ft, idx) => {
+                ft.update();
+                if (ft.life <= 0) floatingTexts.splice(idx, 1);
+            });
+        }
+
+        function draw() {
+            ctx.fillStyle = '#0f172a';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            // Draw Base Center Core
+            ctx.fillStyle = '#1e1b4b';
+            ctx.beginPath();
+            ctx.arc(400, 300, 35, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.lineWidth = 4;
+            ctx.strokeStyle = '#4338ca';
+            ctx.stroke();
+
+            // Draw Glowing Base Armor Bubble if active
+            if (baseShieldActive && baseShieldHp > 0) {
+                ctx.save();
+                ctx.strokeStyle = '#22d3ee';
+                ctx.lineWidth = 3 + Math.sin(Date.now() / 100) * 1.5;
+                ctx.shadowColor = '#22d3ee';
+                ctx.shadowBlur = 12;
+                ctx.setLineDash([6, 4]);
+                ctx.beginPath();
+                ctx.arc(400, 300, 48, 0, Math.PI * 2);
+                ctx.stroke();
+                ctx.restore();
+            }
+
+            ctx.fillStyle = '#ffffff';
+            ctx.font = "bold 11px 'Fredoka', sans-serif";
+            ctx.textAlign = 'center';
+            ctx.fillText("BASE", 400, 304);
+
+            // Turret slots
+            turretSlots.forEach(slot => {
+                if (slot.turret) return;
+
+                ctx.save();
+                ctx.strokeStyle = slot.hovered && pendingTurretType ? '#fbbf24' : '#312e81';
+                ctx.lineWidth = slot.hovered && pendingTurretType ? 3 : 2;
+                ctx.setLineDash([5, 5]);
+                ctx.beginPath();
+                ctx.arc(slot.x, slot.y, 22, 0, Math.PI * 2);
+                ctx.stroke();
+
+                if (pendingTurretType) {
+                    ctx.fillStyle = slot.hovered ? 'rgba(251, 191, 36, 0.15)' : 'rgba(49, 46, 129, 0.1)';
+                    ctx.beginPath();
+                    ctx.arc(slot.x, slot.y, 20, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.font = "bold 9px 'Fredoka', sans-serif";
+                    ctx.fillStyle = slot.hovered ? '#fbbf24' : '#4338ca';
+                    ctx.fillText("BUILD", slot.x, slot.y + 3);
+                }
+                ctx.restore();
+            });
+
+            // Turrets
+            turretSlots.forEach(slot => {
+                if (!slot.turret) return;
+                const t = slot.turret;
+
+                ctx.save();
+                ctx.fillStyle = '#1e293b';
+                ctx.strokeStyle = '#4f46e5';
+                ctx.lineWidth = 3;
+                ctx.beginPath();
+                ctx.arc(t.x, t.y, 18, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.stroke();
+
+                let cColor = '#ef4444';
+                if (t.type === 'turret-aoe') cColor = '#c084fc';
+                else if (t.type === 'turret-rapid') cColor = '#f43f5e';
+                else if (t.type === 'turret-sniper') cColor = '#10b981';
+
+                ctx.fillStyle = cColor;
+                ctx.beginPath();
+                ctx.arc(t.x, t.y, 8, 0, Math.PI * 2);
+                ctx.fill();
+
+                ctx.fillStyle = '#ffffff';
+                ctx.font = "bold 9px 'Share Tech Mono', monospace";
+                ctx.textAlign = 'center';
+                ctx.fillText(`L${t.level}`, t.x, t.y + 3);
+                ctx.restore();
+            });
+
+            // Draw player character
+            ctx.save();
+            ctx.translate(player.x, player.y);
+            ctx.rotate(player.angle);
+            ctx.fillStyle = selectedClass === 'engineer' ? '#2dd4bf' : (selectedClass === 'gunner' ? '#fbbf24' : (selectedClass === 'medic' ? '#10b981' : '#f43f5e'));
+            ctx.beginPath();
+            ctx.arc(0, 0, player.radius, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Barrel pointer
+            ctx.fillStyle = '#ffffff';
+            ctx.fillRect(5, -4, 18, 8);
+            ctx.restore();
+
+            // Draw Protective Player Energy Field if active
+            if (player.shieldActive && player.shieldHp > 0) {
+                ctx.save();
+                ctx.strokeStyle = '#22d3ee';
+                ctx.lineWidth = 2.5;
+                ctx.shadowColor = '#22d3ee';
+                ctx.shadowBlur = 8;
+                ctx.beginPath();
+                ctx.arc(player.x, player.y, player.radius + 6, 0, Math.PI * 2);
+                ctx.stroke();
+                ctx.restore();
+            }
+
+            // Draw second/connected player
+            if (isMultiplayer && clientPlayer.active) {
+                ctx.save();
+                ctx.translate(clientPlayer.x, clientPlayer.y);
+                ctx.rotate(clientPlayer.angle);
+                ctx.fillStyle = clientPlayer.selectedClass === 'engineer' ? '#2dd4bf' : (clientPlayer.selectedClass === 'gunner' ? '#fbbf24' : (clientPlayer.selectedClass === 'medic' ? '#10b981' : '#f43f5e'));
+                ctx.beginPath();
+                ctx.arc(0, 0, player.radius, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.fillStyle = '#e2e8f0';
+                ctx.fillRect(5, -4, 18, 8);
+                ctx.restore();
+            }
+
+            // Draw Monsters
+            monsters.forEach(m => {
+                ctx.save();
+                
+                const wobble = Math.sin((Date.now() / 150) + m.wiggleOffset) * 2;
+                const visualRadius = m.radius + wobble * 0.45;
+
+                ctx.fillStyle = m.color;
+                ctx.beginPath();
+                ctx.arc(m.x, m.y + wobble, visualRadius, 0, Math.PI * 2);
+                ctx.fill();
+
+                const percent = m.hp / m.maxHp;
+                ctx.fillStyle = '#1e1b4b';
+                ctx.fillRect(m.x - 15, m.y - m.radius - 16, 30, 4);
+                ctx.fillStyle = '#22c55e';
+                ctx.fillRect(m.x - 15, m.y - m.radius - 16, 30 * percent, 4);
+
+                ctx.fillStyle = '#fcd34d';
+                ctx.font = "bold 9px 'Fredoka', sans-serif";
+                ctx.textAlign = 'center';
+                ctx.fillText(m.name, m.x, m.y - m.radius - 22);
+
+                // Googly Eyes
+                ctx.fillStyle = '#ffffff';
+                ctx.beginPath();
+                ctx.arc(m.x - visualRadius * 0.35, m.y + wobble - visualRadius * 0.15, visualRadius * 0.3, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.fillStyle = '#000000';
+                ctx.beginPath();
+                ctx.arc(m.x - visualRadius * 0.35 + Math.sin(Date.now() / 80) * (visualRadius * 0.08), m.y + wobble - visualRadius * 0.15 + Math.cos(Date.now() / 120) * (visualRadius * 0.08), visualRadius * 0.12, 0, Math.PI * 2);
+                ctx.fill();
+
+                ctx.fillStyle = '#ffffff';
+                ctx.beginPath();
+                ctx.arc(m.x + visualRadius * 0.25, m.y + wobble - visualRadius * 0.2, visualRadius * 0.38, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.fillStyle = '#000000';
+                ctx.beginPath();
+                ctx.arc(m.x + visualRadius * 0.25 + Math.cos(Date.now() / 90) * (visualRadius * 0.1), m.y + wobble - visualRadius * 0.2 + Math.sin(Date.now() / 110) * (visualRadius * 0.1), visualRadius * 0.15, 0, Math.PI * 2);
+                ctx.fill();
+
+                // Sticking Out Tongue
+                ctx.fillStyle = '#f43f5e';
+                ctx.beginPath();
+                ctx.arc(m.x, m.y + wobble + visualRadius * 0.45, visualRadius * 0.18 + Math.abs(wobble) * 0.1, 0, Math.PI * 2);
+                ctx.fill();
+
+                ctx.restore();
+            });
+
+            // Draw Bullets
+            bullets.forEach(b => {
+                ctx.save();
+                ctx.fillStyle = b.color;
+                ctx.beginPath();
+                ctx.arc(b.x, b.y, b.radius, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.restore();
+            });
+
+            particles.forEach(p => p.draw());
+            floatingTexts.forEach(ft => ft.draw());
+
+            ctx.fillStyle = '#ffffff';
+            ctx.font = "bold 13px 'Fredoka', sans-serif";
+            ctx.textAlign = 'left';
+            ctx.fillText(`SCORE: ${score}`, 15, 25);
+            ctx.fillText(`WAVE: ${wave}`, 15, 45);
+
+            if (isMultiplayer) {
+                ctx.fillStyle = '#38bdf8';
+                ctx.font = "bold 11px 'Fredoka', sans-serif";
+                ctx.fillText(isHost ? "HOST SESSION" : "PEER CLIENT", 15, 65);
+            }
+
+            // Countdown timer mapping
+            const dynamicPercent = Math.max(0, mathTimer / mathTimerMax);
+            const timerBar = document.getElementById('math-timer-bar');
+            if (timerBar) {
+                timerBar.style.width = `${dynamicPercent * 100}%`;
+                if (dynamicPercent < 0.3) {
+                    timerBar.className = "bg-gradient-to-r from-rose-500 to-red-600 h-full w-full transition-all duration-100";
+                } else {
+                    timerBar.className = "bg-gradient-to-r from-emerald-400 to-teal-500 h-full w-full transition-all duration-100";
+                }
+            }
+        }
+
+        function gameLoop() {
+            update();
+            draw();
+            requestAnimationFrame(gameLoop);
+        }
+        requestAnimationFrame(gameLoop);
+
+        // Export global mappings safely
+        window.togglePauseGame = togglePauseGame;
+        window.toggleAFKMode = toggleAFKMode;
+        window.toggleAudioMute = toggleAudioMute;
+        window.hostGame = hostGame;
+        window.joinGame = joinGame;
+        window.launchGame = launchGame;
+        window.restartGame = restartGame;
+        window.buyGear = buyGear;
+        window.buyTurretUpgrade = buyTurretUpgrade;
+        window.cancelTurretPlacement = cancelTurretPlacement;
+        window.answerMath = answerMath;
+        window.copyRoomId = copyRoomId;
+        window.goHome = goHome;
+        window.toggleAboutModal = toggleAboutModal;
+        window.selectClass = selectClass;
+        window.selectDifficulty = selectDifficulty;
+        window.toggleOmniShoot = toggleOmniShoot;
+        window.toggleLeaderboardModal = toggleLeaderboardModal;
+        window.toggleDevTeamModal = toggleDevTeamModal;
+        window.submitScore = submitScore;
+
+        console.log('🚀 Upgraded self-healing Monster Siege loaded.');
+        console.log('📚 Continuous Math Engine active with 20s countdown.');
+        console.log('🔥 3 consecutive correct → MONSTER WIPE & ARMOR BOOST!');
+        console.log('🎯 Findable mobile buttons active with 10s cooldown system lockout pause.');
+    </script>
+</body>
+</html>
