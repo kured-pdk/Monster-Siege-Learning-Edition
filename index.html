@@ -21,6 +21,12 @@
         .health-ring { transition: stroke-dashoffset 0.2s; }
         .turret-hp-bar { height:4px; border-radius:2px; background:#1e1b4b; overflow:hidden; }
         .turret-hp-fill { height:100%; background:#22c55e; transition:width 0.2s; }
+        .hint-glow { animation:hintPulse 0.8s ease-in-out 3; }
+        @keyframes hintPulse { 0%,100%{box-shadow:0 0 0 0 rgba(251,191,36,0);} 50%{box-shadow:0 0 30px 10px rgba(251,191,36,0.6);} }
+        .kid-mode-simple .engineering-station,
+        .kid-mode-simple .toggle-row,
+        .kid-mode-simple .math-streak-badge { display:none !important; }
+        .kid-mode-simple .math-panel { border-color:#fbbf24; }
     </style>
 </head>
 <body class="text-white relative">
@@ -130,7 +136,7 @@
         <!-- Canvas area -->
         <div class="relative flex-grow flex items-center justify-center bg-slate-950 p-2 overflow-hidden h-[60vh] lg:h-full">
             <canvas id="game-canvas" class="border border-indigo-900/40 rounded-xl bg-slate-900 shadow-inner w-full h-full max-w-full max-h-full aspect-video"></canvas>
-            
+
             <!-- Mobile controls -->
             <div id="touch-controls" class="absolute bottom-4 left-4 flex gap-4 pointer-events-none md:hidden z-30">
                 <div id="joystick-container" class="w-24 h-24 bg-slate-950/40 border border-slate-800 rounded-full flex items-center justify-center pointer-events-auto shadow-lg backdrop-blur-sm touch-none">
@@ -175,7 +181,7 @@
         </div>
 
         <!-- Side panel -->
-        <div class="w-full lg:w-[420px] flex-shrink-0 bg-slate-950 border-t lg:border-t-0 lg:border-l border-indigo-950 p-3 flex flex-col justify-between overflow-y-auto h-[40vh] lg:h-full gap-3 relative">
+        <div id="side-panel" class="w-full lg:w-[420px] flex-shrink-0 bg-slate-950 border-t lg:border-t-0 lg:border-l border-indigo-950 p-3 flex flex-col justify-between overflow-y-auto h-[40vh] lg:h-full gap-3 relative">
             <!-- HUD -->
             <div class="bg-indigo-950/40 border border-indigo-900 rounded-2xl p-3 flex justify-between items-center relative">
                 <div class="flex items-center gap-3">
@@ -197,12 +203,22 @@
             </div>
 
             <!-- Math Panel -->
-            <div id="math-panel" class="bg-indigo-950/60 border-2 border-indigo-500 rounded-2xl p-3 shadow-2xl backdrop-blur-sm flex flex-col gap-2 relative">
+            <div id="math-panel" class="bg-indigo-950/60 border-2 border-indigo-500 rounded-2xl p-3 shadow-2xl backdrop-blur-sm flex flex-col gap-2 relative math-panel">
                 <div class="flex justify-between items-center">
                     <span class="text-[10px] text-indigo-300 font-bold uppercase tracking-widest">Continuous Learning Engine</span>
-                    <span id="math-streak-badge" class="hidden bg-amber-500 text-slate-950 text-[10px] font-black px-2 py-0.5 rounded-full uppercase animate-bounce">
-                        <i class="fa-solid fa-fire mr-1"></i>Streak <span id="math-streak-val">0</span>
-                    </span>
+                    <div class="flex items-center gap-2">
+                        <span id="math-streak-badge" class="hidden bg-amber-500 text-slate-950 text-[10px] font-black px-2 py-0.5 rounded-full uppercase animate-bounce math-streak-badge">
+                            <i class="fa-solid fa-fire mr-1"></i>Streak <span id="math-streak-val">0</span>
+                        </span>
+                        <!-- Hint Button -->
+                        <button onclick="useHint()" id="hint-btn" class="bg-amber-600/80 hover:bg-amber-500 text-white text-[10px] font-bold px-2.5 py-1 rounded-full uppercase transition flex items-center gap-1 shadow-lg" title="Use 50 scrap to reveal the correct answer">
+                            <i class="fa-solid fa-lightbulb text-amber-300"></i> Hint
+                        </button>
+                        <!-- Extra Time Button (Kid Mode) -->
+                        <button onclick="buyExtraTime()" id="extra-time-btn" class="bg-emerald-600/80 hover:bg-emerald-500 text-white text-[10px] font-bold px-2.5 py-1 rounded-full uppercase transition flex items-center gap-1 shadow-lg hidden" title="+10 seconds (costs 30 scrap)">
+                            <i class="fa-regular fa-clock"></i> +10s
+                        </button>
+                    </div>
                 </div>
                 <div class="w-full bg-slate-950/60 h-2.5 rounded-full overflow-hidden border border-slate-900 mb-1 relative">
                     <div id="math-timer-bar" class="bg-gradient-to-r from-emerald-400 to-teal-500 h-full w-full transition-all duration-100"></div>
@@ -214,7 +230,7 @@
             </div>
 
             <!-- Engineering Station -->
-            <div class="bg-indigo-950/20 border border-indigo-950 rounded-2xl p-3">
+            <div id="engineering-station" class="bg-indigo-950/20 border border-indigo-950 rounded-2xl p-3 engineering-station">
                 <h3 class="text-xs font-bold text-indigo-300 uppercase tracking-widest mb-2"><i class="fa-solid fa-hammer mr-1.5"></i>Engineering Station</h3>
                 <div class="grid grid-cols-2 gap-2">
                     <button onclick="buyGear('turret-basic')" class="flex flex-col items-start bg-indigo-950/80 hover:bg-indigo-900 border border-indigo-900 p-2.5 rounded-xl transition duration-150 relative">
@@ -241,13 +257,17 @@
             </div>
 
             <!-- Toggles -->
-            <div class="flex gap-2">
+            <div class="flex gap-2 toggle-row">
                 <button onclick="toggleOmniShoot()" id="omni-shoot-btn" class="flex-grow bg-slate-900 hover:bg-indigo-950 text-indigo-400 hover:text-indigo-300 border border-indigo-900/50 rounded-xl py-2 px-3 text-xs font-bold uppercase transition flex items-center justify-center gap-1.5">
                     <i class="fa-solid fa-compass"></i> Omni-Shoot: <span id="omni-status">OFF</span>
                 </button>
                 <button onclick="toggleAFKMode()" id="afk-mode-btn" class="flex-grow bg-slate-900 hover:bg-indigo-950 text-indigo-400 hover:text-indigo-300 border border-indigo-900/50 rounded-xl py-2 px-3 text-xs font-bold uppercase transition flex items-center justify-center gap-1.5">
                     <i class="fa-solid fa-hourglass"></i> AFK Shoot: <span id="afk-status">OFF</span>
                 </button>
+            </div>
+            <!-- AFK timer / cost indicator -->
+            <div id="afk-cost-indicator" class="hidden text-center text-[10px] text-amber-400 font-mono bg-slate-950/60 rounded-xl py-1.5 border border-amber-500/30">
+                ⏱ <span id="afk-time-remaining">30</span>s remaining · <span id="afk-cost-per-sec">5</span> scrap/sec
             </div>
         </div>
     </div>
@@ -274,6 +294,12 @@
                     <button onclick="submitScore()" id="btn-submit-score" class="w-full bg-amber-500 hover:bg-amber-400 text-slate-950 font-black py-2.5 rounded-xl text-xs uppercase tracking-wide transition">Submit Score</button>
                 </div>
             </div>
+            <div id="endless-mode-box" class="hidden bg-slate-950/60 rounded-2xl p-3 border border-emerald-500/30">
+                <button onclick="startEndlessMode()" id="btn-endless-mode" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-black py-2.5 rounded-xl text-xs uppercase tracking-wide transition flex items-center justify-center gap-2">
+                    <i class="fa-solid fa-infinity"></i> Continue to Endless Mode
+                </button>
+                <p class="text-[10px] text-emerald-300/60 mt-1">No victory condition — survive as long as you can!</p>
+            </div>
             <button onclick="restartGame()" class="w-full bg-teal-500 hover:bg-teal-400 text-slate-950 font-black py-3 px-6 rounded-2xl shadow-lg uppercase tracking-widest transform transition active:scale-95">Play Again</button>
             <button onclick="goHome()" class="w-full bg-slate-900 hover:bg-slate-800 text-indigo-400 py-2 rounded-xl text-xs font-bold uppercase transition">Return to Menu</button>
         </div>
@@ -291,6 +317,7 @@
                 <p>5. If you fail to answer within the <span class="font-bold text-rose-400">20-second continuous timer</span>, or submit 5 wrong answers, a random defense turret is lost.</p>
                 <p>6. <span class="font-bold text-teal-400">Survive 20 waves</span> to claim victory!</p>
                 <p>7. <span class="font-bold text-purple-400">Math Monsters</span> (❓) can only be destroyed by answering a math question correctly – bullets don't hurt them!</p>
+                <p class="text-amber-300 text-xs border-t border-indigo-800/40 pt-2 mt-1">💡 <span class="font-bold">Hint:</span> Use the <span class="text-amber-400">💡 Hint</span> button (50 scrap) to reveal the correct answer! In Kid Mode, you get <span class="text-emerald-400">+10s extra time</span> for 30 scrap.</p>
             </div>
             <button onclick="toggleAboutModal(false)" class="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-2 px-4 rounded-xl uppercase transition">Close</button>
         </div>
@@ -351,7 +378,7 @@
 
     <script type="module">
         // ============================================================
-        //  MONSTER SIEGE — FULLY REFACTORED WITH ALL IMPROVEMENTS
+        //  MONSTER SIEGE — v2.2 WITH KID MODE, HINTS, AFK LIMIT, ENDLESS
         // ============================================================
 // ---------- IMPORTS (Firebase) ----------
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
@@ -378,7 +405,7 @@ const appId = typeof __app_id !== 'undefined' ? __app_id : 'monster-siege-learni
         let app, auth, db;
         try {
             if (firebaseConfig.apiKey === "mock-api-key") useMockDatabase = true;
-            else { app = initializeApp(firebaseConfig); auth = getAuth(app); db = getFirestore(app); }
+            else { app = initializeApp(firebaseConfig); auth = getAuth(app); db = getFirestore(app); const analytics = getAnalytics(app);}
         } catch(e) { useMockDatabase = true; }
 
         let currentUser = null, currentUserId = null;
@@ -587,7 +614,11 @@ const appId = typeof __app_id !== 'undefined' ? __app_id : 'monster-siege-learni
         let omniTimeRemaining = 0; // in frames (30 seconds = 1800 frames)
         const OMNI_DURATION = 1800; // 30 sec at 60fps
         const OMNI_COST = 10000;
-        // Remove old variables: omniShoot, omniShootTimeRemaining, omniAfkLockTimer
+        // AFK Limitation: 30 seconds max, costs 5 scrap/sec
+        let afkTimeRemaining = 30; // seconds
+        let afkCostPerSec = 5;
+        let afkTimerInterval = null;
+        let isEndlessMode = false;
         let baseHp = 100, maxBaseHp = 100, baseShieldActive = false, baseShieldHp = 0;
         let spawnCooldown = 120, currentWaveSpawnsLeft = 10, totalMonstersThisWave = 10, isWaveActive = false;
         let consecutiveCorrect = 0, wrongAnswers = 0, unansweredCount = 0, kidMode = false;
@@ -621,6 +652,7 @@ const appId = typeof __app_id !== 'undefined' ? __app_id : 'monster-siege-learni
             if (e.key.toLowerCase() === 'o') toggleOmniShoot();
             if (e.key.toLowerCase() === 'm') toggleAudioMute();
             if (e.key.toLowerCase() === 'r') { if (gameActive && !gameOver) restartGame(); }
+            if (e.key.toLowerCase() === 'h') useHint();
         });
         window.addEventListener('keyup', (e) => { keys[e.key.toLowerCase()] = false; });
 
@@ -743,6 +775,8 @@ const appId = typeof __app_id !== 'undefined' ? __app_id : 'monster-siege-learni
                 this.adaptLevel = 1; // 1-5
                 this.correctHistory = [];
                 this.maxHistory = 10;
+                this.hintActive = false;
+                this.hintTimer = null;
             }
             generate() {
                 if (!gameActive || gameOver) return;
@@ -792,9 +826,13 @@ const appId = typeof __app_id !== 'undefined' ? __app_id : 'monster-siege-learni
                     question: `${num1} ${op} ${num2} = ?`,
                     options: sorted,
                     correct: correctIdx,
-                    isBonus: isBonus
+                    isBonus: isBonus,
+                    rawQuestion: `${num1} ${op} ${num2}`
                 };
-                this.timer = 20;
+                // Kid Mode: double timer
+                this.timer = kidMode ? 40 : 20;
+                this.hintActive = false;
+                if (this.hintTimer) { clearTimeout(this.hintTimer); this.hintTimer = null; }
                 renderMathQuestion(this.currentQuestion);
                 if (isMultiplayer && isHost) sendGameState();
             }
@@ -806,8 +844,54 @@ const appId = typeof __app_id !== 'undefined' ? __app_id : 'monster-siege-learni
                 if (this.correctHistory.length > this.maxHistory) this.correctHistory.shift();
                 return correct;
             }
+
+            activateHint() {
+                if (!this.currentQuestion || this.hintActive) return;
+                this.hintActive = true;
+                // Highlight the correct option in the UI
+                const grid = document.getElementById('math-options-grid');
+                if (grid) {
+                    const btns = grid.querySelectorAll('button');
+                    btns.forEach((btn, idx) => {
+                        if (idx === this.currentQuestion.correct) {
+                            btn.classList.add('hint-glow', 'border-amber-400', 'bg-amber-500/20');
+                            btn.style.borderColor = '#fbbf24';
+                            btn.style.boxShadow = '0 0 20px rgba(251,191,36,0.5)';
+                        }
+                    });
+                }
+                floatingTexts.push(new FloatingText(400, 220, "💡 HINT REVEALED!", "#fbbf24", 18));
+                // Auto-clear hint after 3 seconds
+                if (this.hintTimer) clearTimeout(this.hintTimer);
+                this.hintTimer = setTimeout(() => {
+                    this.hintActive = false;
+                    if (grid) {
+                        const btns = grid.querySelectorAll('button');
+                        btns.forEach((btn) => {
+                            btn.classList.remove('hint-glow', 'border-amber-400', 'bg-amber-500/20');
+                            btn.style.borderColor = '';
+                            btn.style.boxShadow = '';
+                        });
+                    }
+                }, 3000);
+            }
         }
         const mathEngine = new MathEngine();
+
+        // ----- helper for rounded rects (fix for unsupported roundRect) -----
+        function drawRoundRect(ctx, x, y, w, h, r) {
+            ctx.beginPath();
+            ctx.moveTo(x + r, y);
+            ctx.lineTo(x + w - r, y);
+            ctx.quadraticCurveTo(x + w, y, x + w, y + r);
+            ctx.lineTo(x + w, y + h - r);
+            ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+            ctx.lineTo(x + r, y + h);
+            ctx.quadraticCurveTo(x, y + h, x, y + h - r);
+            ctx.lineTo(x, y + r);
+            ctx.quadraticCurveTo(x, y, x + r, y);
+            ctx.closePath();
+        }
 
         function renderMathQuestion(q) {
             const textEl = document.getElementById('math-question-text');
@@ -827,9 +911,27 @@ const appId = typeof __app_id !== 'undefined' ? __app_id : 'monster-siege-learni
                     'bg-slate-900/60 border-indigo-500/30 hover:border-indigo-400 text-indigo-100 hover:bg-indigo-950/40'
                 }`;
                 btn.innerHTML = `<span>${opt}</span><span class="text-[10px] opacity-40 font-mono">#${idx+1}</span>`;
+                btn.dataset.idx = idx;
                 btn.onclick = () => handleMathAnswer(idx);
                 gridEl.appendChild(btn);
             });
+            // Update hint button state
+            const hintBtn = document.getElementById('hint-btn');
+            if (hintBtn) {
+                hintBtn.disabled = (scrap < 50 || mathEngine.hintActive);
+                hintBtn.style.opacity = (scrap < 50 || mathEngine.hintActive) ? '0.5' : '1';
+            }
+            // Update extra time button visibility
+            const extraBtn = document.getElementById('extra-time-btn');
+            if (extraBtn) {
+                if (kidMode) {
+                    extraBtn.classList.remove('hidden');
+                    extraBtn.disabled = (scrap < 30);
+                    extraBtn.style.opacity = (scrap < 30) ? '0.5' : '1';
+                } else {
+                    extraBtn.classList.add('hidden');
+                }
+            }
         }
 
         function handleMathAnswer(index) {
@@ -848,10 +950,8 @@ const appId = typeof __app_id !== 'undefined' ? __app_id : 'monster-siege-learni
                 if (isMultiplayer && clientPlayer.active) floatingTexts.push(new FloatingText(clientPlayer.x, clientPlayer.y-10, `+${reward} Scrap`, '#fbbf24', 16));
 
                 // --- Math Monster destruction ---
-                // Find the closest math monster to the base (or any) and destroy it
                 const mathMonsters = monsters.filter(m => m.type === 'math');
                 if (mathMonsters.length > 0) {
-                    // Destroy the closest one to the base (400,300)
                     let closest = null;
                     let minDist = Infinity;
                     mathMonsters.forEach(m => {
@@ -861,9 +961,8 @@ const appId = typeof __app_id !== 'undefined' ? __app_id : 'monster-siege-learni
                     if (closest) {
                         const idx = monsters.indexOf(closest);
                         if (idx !== -1) {
-                            // Remove monster with particles and extra scrap
                             for (let i=0; i<20; i++) particles.push(new Particle(closest.x, closest.y, '#a78bfa', Math.random()*4+2));
-                            scrap += 200; // bonus for math monster kill
+                            scrap += 200;
                             score += 100;
                             floatingTexts.push(new FloatingText(closest.x, closest.y-20, "🧠 MATH MONSTER DESTROYED!", "#a78bfa", 16));
                             audio.play('explosion');
@@ -911,12 +1010,50 @@ const appId = typeof __app_id !== 'undefined' ? __app_id : 'monster-siege-learni
                 updateTimerBar();
             }, 1000);
         }
+
         function updateTimerBar() {
             const bar = document.getElementById('math-timer-bar');
             if (!bar) return;
-            const percent = Math.max(0, mathEngine.timer / 20);
+            const maxTime = kidMode ? 40 : 20;
+            const percent = Math.max(0, mathEngine.timer / maxTime);
             bar.style.width = `${percent*100}%`;
             bar.className = percent < 0.3 ? "bg-gradient-to-r from-rose-500 to-red-600 h-full w-full transition-all duration-100" : "bg-gradient-to-r from-emerald-400 to-teal-500 h-full w-full transition-all duration-100";
+        }
+
+        // ---------- HINT SYSTEM ----------
+        function useHint() {
+            if (!gameActive || gameOver || isPaused || !mathEngine.currentQuestion) return;
+            if (scrap < 50) {
+                floatingTexts.push(new FloatingText(400, 220, "Need 50 Scrap for a hint!", "#ef4444", 14));
+                return;
+            }
+            if (mathEngine.hintActive) {
+                floatingTexts.push(new FloatingText(400, 220, "Hint already active!", "#fbbf24", 14));
+                return;
+            }
+            scrap -= 50;
+            mathEngine.activateHint();
+            updateUI();
+            if (isMultiplayer && isHost) sendGameState();
+        }
+
+        // ---------- EXTRA TIME (Kid Mode) ----------
+        function buyExtraTime() {
+            if (!gameActive || gameOver || isPaused) return;
+            if (!kidMode) {
+                floatingTexts.push(new FloatingText(400, 220, "Only available in Kid Mode!", "#fbbf24", 14));
+                return;
+            }
+            if (scrap < 30) {
+                floatingTexts.push(new FloatingText(400, 220, "Need 30 Scrap for extra time!", "#ef4444", 14));
+                return;
+            }
+            scrap -= 30;
+            mathEngine.timer = Math.min(mathEngine.timer + 10, kidMode ? 40 : 20);
+            floatingTexts.push(new FloatingText(400, 220, "⏰ +10 seconds added!", "#10b981", 16));
+            audio.play('math-success');
+            updateUI();
+            if (isMultiplayer && isHost) sendGameState();
         }
 
         // ---------- GAME MECHANICS ----------
@@ -928,7 +1065,6 @@ const appId = typeof __app_id !== 'undefined' ? __app_id : 'monster-siege-learni
                 let type = typeOverride || 'normal';
                 let roll = Math.random();
                 if (!typeOverride) {
-                    // Math monsters appear from wave 2 onwards with 10% chance
                     if (wave >= 2 && roll < 0.10) {
                         type = 'math';
                     } else if (wave >= 2 && roll < 0.20) {
@@ -948,11 +1084,11 @@ const appId = typeof __app_id !== 'undefined' ? __app_id : 'monster-siege-learni
                 if (type === 'speedy') { hp = 15 + wave*6; speed = 2.0 + wave*0.15; radius=12; color='#f59e0b'; }
                 else if (type === 'tank') { hp = 60 + wave*25; speed = 0.5 + wave*0.04; radius=22; color='#8b5cf6'; }
                 else if (type === 'boss') { hp = 200 + wave*100; speed = 0.4 + wave*0.02; radius=30; color='#06b6d4'; scrapValue=50; }
-                else if (type === 'math') { 
-                    hp = 30 + wave*15; 
-                    speed = 0.6 + wave*0.06; 
-                    radius = 18; 
-                    color = '#a78bfa'; 
+                else if (type === 'math') {
+                    hp = 30 + wave*15;
+                    speed = 0.6 + wave*0.06;
+                    radius = 18;
+                    color = '#a78bfa';
                     scrapValue = 30 + wave*5;
                 }
                 // Difficulty speed multiplier
@@ -1171,7 +1307,7 @@ const appId = typeof __app_id !== 'undefined' ? __app_id : 'monster-siege-learni
                         bullets = data.bullets || [];
                         // math
                         mathEngine.currentQuestion = data.currentQuestion;
-                        mathEngine.timer = data.mathTimer || 20;
+                        mathEngine.timer = data.mathTimer || (kidMode ? 40 : 20);
                         consecutiveCorrect = data.consecutiveCorrect || 0;
                         renderMathQuestion(mathEngine.currentQuestion);
                         updateUI();
@@ -1219,7 +1355,7 @@ const appId = typeof __app_id !== 'undefined' ? __app_id : 'monster-siege-learni
         function update() {
             if (!gameActive || gameOver || isPaused) return;
 
-            // Omni-Shoot persistent energy pool: if active, count down
+            // Omni-Shoot persistent energy pool
             if (omniActive) {
                 omniTimeRemaining--;
                 if (omniTimeRemaining <= 0) {
@@ -1227,6 +1363,34 @@ const appId = typeof __app_id !== 'undefined' ? __app_id : 'monster-siege-learni
                     floatingTexts.push(new FloatingText(player.x, player.y-15, "OMNI-SHOOT DEPLETED", "#f43f5e", 16));
                     audio.play('math-fail');
                     updateTogglesUI();
+                }
+            }
+
+            // AFK mode: drain scrap and timer
+            if (isAFK && gameActive && !gameOver && !isPaused) {
+                // Drain scrap per second (every 60 frames)
+                if (Math.floor(Date.now() / 1000) % 1 === 0 && Math.random() < 0.016) { // ~once per second
+                    if (scrap >= afkCostPerSec && afkTimeRemaining > 0) {
+                        scrap -= afkCostPerSec;
+                        afkTimeRemaining--;
+                        updateAFKIndicator();
+                        if (afkTimeRemaining <= 0) {
+                            isAFK = false;
+                            floatingTexts.push(new FloatingText(player.x, player.y-15, "AFK MODE EXPIRED", "#f43f5e", 14));
+                            audio.play('math-fail');
+                            updateTogglesUI();
+                            updateAFKIndicator();
+                        }
+                        updateUI();
+                    } else {
+                        // Not enough scrap or time expired
+                        if (scrap < afkCostPerSec) {
+                            floatingTexts.push(new FloatingText(player.x, player.y-15, "Not enough scrap for AFK!", "#ef4444", 12));
+                        }
+                        isAFK = false;
+                        updateTogglesUI();
+                        updateAFKIndicator();
+                    }
                 }
             }
 
@@ -1256,7 +1420,6 @@ const appId = typeof __app_id !== 'undefined' ? __app_id : 'monster-siege-learni
             let activeShooting = false;
             if (player.cooldown <= 0) {
                 if (omniActive) {
-                    // Omni-shoot: 360 degrees
                     for (let a=0; a<Math.PI*2; a+=Math.PI/6) spawnBullet(player.x, player.y, a, '#38bdf8');
                     player.cooldown = 4; activeShooting = true;
                 } else if (isAFK || (targetX !== null && targetY !== null)) {
@@ -1280,8 +1443,8 @@ const appId = typeof __app_id !== 'undefined' ? __app_id : 'monster-siege-learni
                 if (currentWaveSpawnsLeft <= 0 && monsters.length === 0) {
                     isWaveActive = false;
                     wave++;
-                    // Victory check
-                    if (wave > victoryWave) {
+                    // Victory check (unless endless mode)
+                    if (!isEndlessMode && wave > victoryWave) {
                         triggerVictory();
                         return;
                     }
@@ -1325,7 +1488,6 @@ const appId = typeof __app_id !== 'undefined' ? __app_id : 'monster-siege-learni
                 if (!isMultiplayer || isHost) {
                     for (let mIdx=0; mIdx<monsters.length; mIdx++) {
                         const m = monsters[mIdx];
-                        // Math monsters are immune to bullets
                         if (m.type === 'math') continue;
                         if (Math.hypot(m.x - b.x, m.y - b.y) < m.radius + b.radius) {
                             m.hp -= b.damage;
@@ -1349,14 +1511,13 @@ const appId = typeof __app_id !== 'undefined' ? __app_id : 'monster-siege-learni
                 }
             });
 
-            // Turrets - also skip math monsters (turrets won't target them? They already target, but we can skip shooting at them)
+            // Turrets
             turretSlots.forEach(slot => {
                 if (!slot.turret) return;
                 const t = slot.turret;
                 if (t.cooldown > 0) t.cooldown--;
                 let target = null, closestDist = t.range;
                 monsters.forEach(m => {
-                    // Skip math monsters for turret targeting
                     if (m.type === 'math') return;
                     const d = Math.hypot(m.x - t.x, m.y - t.y);
                     if (d < closestDist) { closestDist = d; target = m; }
@@ -1366,7 +1527,7 @@ const appId = typeof __app_id !== 'undefined' ? __app_id : 'monster-siege-learni
                         t.cooldown = 45;
                         audio.play('shoot');
                         monsters.forEach(m => {
-                            if (m.type === 'math') return; // AOE also skips math
+                            if (m.type === 'math') return;
                             if (Math.hypot(m.x - t.x, m.y - t.y) < t.range) {
                                 m.hp -= t.damage;
                                 for (let i=0; i<5; i++) particles.push(new Particle(m.x, m.y, '#c084fc', 2));
@@ -1388,11 +1549,11 @@ const appId = typeof __app_id !== 'undefined' ? __app_id : 'monster-siege-learni
             particles.forEach((p, idx) => { p.update(); if (p.life <= 0) particles.splice(idx,1); });
             floatingTexts.forEach((ft, idx) => { ft.update(); if (ft.life <= 0) floatingTexts.splice(idx,1); });
 
-            // Limit particles
             if (particles.length > 200) particles.splice(0, particles.length - 200);
 
             updateTogglesUI();
             updateTimerBar();
+            updateAFKIndicator();
         }
 
         function draw() {
@@ -1539,7 +1700,6 @@ const appId = typeof __app_id !== 'undefined' ? __app_id : 'monster-siege-learni
                 ctx.fillStyle = '#f43f5e';
                 ctx.beginPath(); ctx.arc(m.x, m.y+wobble + r*0.45, r*0.18 + Math.abs(wobble)*0.1, 0, Math.PI*2); ctx.fill();
 
-                // Math monster special indicator: question mark
                 if (m.type === 'math') {
                     ctx.fillStyle = '#fff';
                     ctx.font = "bold 20px 'Fredoka', sans-serif";
@@ -1566,21 +1726,23 @@ const appId = typeof __app_id !== 'undefined' ? __app_id : 'monster-siege-learni
             ctx.font = "bold 13px 'Fredoka', sans-serif";
             ctx.textAlign = 'left';
             ctx.fillText(`SCORE: ${score}`, 15, 25);
-            ctx.fillText(`WAVE: ${wave}`, 15, 45);
+            ctx.fillText(`WAVE: ${wave}${isEndlessMode ? ' ♾️' : ''}`, 15, 45);
             if (isMultiplayer) {
                 ctx.fillStyle = '#38bdf8';
                 ctx.font = "bold 11px 'Fredoka', sans-serif";
                 ctx.fillText(isHost ? "HOSTING SESSION" : "PLAYING CO-OP", 15, 65);
             }
 
-            // Status overlay for Omni
+            // Status overlay for Omni (using helper to avoid roundRect)
             if (omniActive) {
                 const sec = Math.ceil(omniTimeRemaining / 60);
                 ctx.save();
                 ctx.fillStyle = 'rgba(15,23,42,0.85)';
                 ctx.strokeStyle = '#312e81';
                 ctx.lineWidth = 2;
-                ctx.beginPath(); ctx.roundRect(260,12,280,48,12); ctx.fill(); ctx.stroke();
+                drawRoundRect(ctx, 260, 12, 280, 48, 12);
+                ctx.fill();
+                ctx.stroke();
                 ctx.textAlign = 'center';
                 ctx.fillStyle = '#ec4899';
                 ctx.font = "bold 11px 'Fredoka', sans-serif";
@@ -1590,18 +1752,21 @@ const appId = typeof __app_id !== 'undefined' ? __app_id : 'monster-siege-learni
                 ctx.fillText(`${sec}s REMAINING`, 400, 45);
                 ctx.restore();
             } else if (isAFK) {
+                const sec = Math.ceil(afkTimeRemaining);
                 ctx.save();
                 ctx.fillStyle = 'rgba(15,23,42,0.85)';
                 ctx.strokeStyle = '#312e81';
                 ctx.lineWidth = 2;
-                ctx.beginPath(); ctx.roundRect(260,12,280,48,12); ctx.fill(); ctx.stroke();
+                drawRoundRect(ctx, 260, 12, 280, 48, 12);
+                ctx.fill();
+                ctx.stroke();
                 ctx.textAlign = 'center';
                 ctx.fillStyle = '#10b981';
                 ctx.font = "bold 11px 'Fredoka', sans-serif";
                 ctx.fillText("🤖 AFK SENTRY AUTOPILOT", 400, 28);
                 ctx.font = "bold 11px 'Share Tech Mono', monospace";
                 ctx.fillStyle = '#34d399';
-                ctx.fillText("AUTO-ENGAGING ALL THREATS", 400, 45);
+                ctx.fillText(`${sec}s · ${afkCostPerSec} scrap/s`, 400, 45);
                 ctx.restore();
             }
         }
@@ -1618,6 +1783,24 @@ const appId = typeof __app_id !== 'undefined' ? __app_id : 'monster-siege-learni
             document.getElementById('hud-scrap').textContent = scrap;
             document.getElementById('base-hp-text').textContent = `${baseHp}/${maxBaseHp}`;
             updateArmorHUD();
+            // Update hint button state
+            const hintBtn = document.getElementById('hint-btn');
+            if (hintBtn) {
+                hintBtn.disabled = (scrap < 50 || mathEngine.hintActive);
+                hintBtn.style.opacity = (scrap < 50 || mathEngine.hintActive) ? '0.5' : '1';
+            }
+            const extraBtn = document.getElementById('extra-time-btn');
+            if (extraBtn && kidMode) {
+                extraBtn.disabled = (scrap < 30);
+                extraBtn.style.opacity = (scrap < 30) ? '0.5' : '1';
+            }
+            // Kid Mode UI simplification
+            const sidePanel = document.getElementById('side-panel');
+            if (kidMode) {
+                sidePanel.classList.add('kid-mode-simple');
+            } else {
+                sidePanel.classList.remove('kid-mode-simple');
+            }
         }
 
         function updateTogglesUI() {
@@ -1630,7 +1813,6 @@ const appId = typeof __app_id !== 'undefined' ? __app_id : 'monster-siege-learni
             const mobAfk = document.getElementById('mobile-afk-btn');
             const mobAfkStatus = document.getElementById('mobile-afk-status');
 
-            // Omni status: show remaining time if active, else "OFF"
             if (omniActive) {
                 const sec = Math.ceil(omniTimeRemaining / 60);
                 const statusText = `${sec}s`;
@@ -1645,7 +1827,6 @@ const appId = typeof __app_id !== 'undefined' ? __app_id : 'monster-siege-learni
                 if (mobOmni) mobOmni.className = "bg-slate-900 text-indigo-400 border border-indigo-900/50 rounded-2xl py-3 px-4 text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-2 shadow-lg transition-all duration-150";
             }
 
-            // AFK unchanged
             if (afkStatus) afkStatus.textContent = isAFK ? "ON" : "OFF";
             if (afkBtn) {
                 afkBtn.className = isAFK ? "flex-grow rounded-xl py-2 px-3 text-xs font-bold uppercase transition flex items-center justify-center gap-1.5 bg-emerald-600 text-white border-emerald-400" : "flex-grow rounded-xl py-2 px-3 text-xs font-bold uppercase transition flex items-center justify-center gap-1.5 bg-slate-900 text-indigo-400 border border-indigo-900/50";
@@ -1654,24 +1835,37 @@ const appId = typeof __app_id !== 'undefined' ? __app_id : 'monster-siege-learni
             if (mobAfk) {
                 mobAfk.className = isAFK ? "bg-emerald-600 text-white border border-emerald-400 rounded-2xl py-3 px-4 text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-2 shadow-lg transition-all duration-150" : "bg-slate-900 text-indigo-400 border border-indigo-900/50 rounded-2xl py-3 px-4 text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-2 shadow-lg transition-all duration-150";
             }
+            updateAFKIndicator();
         }
 
-        // ---------- OMNI-SHOOT TOGGLE (new) ----------
+        function updateAFKIndicator() {
+            const indicator = document.getElementById('afk-cost-indicator');
+            const timeRem = document.getElementById('afk-time-remaining');
+            const costPerSec = document.getElementById('afk-cost-per-sec');
+            if (isAFK) {
+                indicator.classList.remove('hidden');
+                if (timeRem) timeRem.textContent = Math.ceil(afkTimeRemaining);
+                if (costPerSec) costPerSec.textContent = afkCostPerSec;
+            } else {
+                indicator.classList.add('hidden');
+                // Reset AFK timer when not active
+                if (!isAFK && gameActive) {
+                    afkTimeRemaining = 30;
+                }
+            }
+        }
+
+        // ---------- OMNI-SHOOT TOGGLE ----------
         function toggleOmniShoot() {
             if (!gameActive || gameOver || isPaused) return;
             if (omniActive) {
-                // Already active, cannot toggle again until it expires or we allow deactivation? Let's allow deactivation (but scrap already spent)
-                // We'll allow deactivation to save remaining time? But spec says "burn 10000 scrap for each 30 sec", so maybe once activated it runs fully.
-                // We'll just ignore toggle if already active.
                 floatingTexts.push(new FloatingText(player.x, player.y-10, "OMNI-ALREADY ACTIVE", "#fbbf24", 12));
                 return;
             }
-            // Check scrap
             if (scrap < OMNI_COST) {
                 floatingTexts.push(new FloatingText(player.x, player.y-10, `Need ${OMNI_COST} Scrap`, "#ef4444", 12));
                 return;
             }
-            // Deduct scrap and activate
             scrap -= OMNI_COST;
             omniActive = true;
             omniTimeRemaining = OMNI_DURATION;
@@ -1684,8 +1878,23 @@ const appId = typeof __app_id !== 'undefined' ? __app_id : 'monster-siege-learni
         // ---------- TOGGLE AFK ----------
         function toggleAFKMode() {
             if (!gameActive || gameOver || isPaused) return;
-            isAFK = !isAFK;
+            if (!isAFK) {
+                // Check if we have enough scrap to start
+                if (scrap < afkCostPerSec) {
+                    floatingTexts.push(new FloatingText(player.x, player.y-10, `Need ${afkCostPerSec} scrap to start AFK`, "#ef4444", 12));
+                    return;
+                }
+                if (afkTimeRemaining <= 0) {
+                    floatingTexts.push(new FloatingText(player.x, player.y-10, "AFK timer depleted. Restart game to reset.", "#fbbf24", 12));
+                    return;
+                }
+                isAFK = true;
+            } else {
+                isAFK = false;
+                afkTimeRemaining = 30; // reset when turned off manually
+            }
             updateTogglesUI();
+            updateUI();
         }
 
         // ---------- PAUSE & AUDIO ----------
@@ -1713,9 +1922,13 @@ const appId = typeof __app_id !== 'undefined' ? __app_id : 'monster-siege-learni
             gameActive = true; gameOver = false; isPaused = false;
             consecutiveCorrect = 0; wrongAnswers = 0; unansweredCount = 0;
             omniActive = false; omniTimeRemaining = 0;
+            isEndlessMode = false;
+            afkTimeRemaining = 30;
+            isAFK = false;
             updateTogglesUI(); updateArmorHUD();
             document.getElementById('game-over-screen').classList.add('hidden');
             document.getElementById('leaderboard-submit-box').classList.remove('hidden');
+            document.getElementById('endless-mode-box').classList.add('hidden');
             const submitName = document.getElementById('leaderboard-name-input');
             if (submitName) {
                 if (isMultiplayer && clientPlayer.active) submitName.value = `${player.name} & ${clientPlayer.name}`;
@@ -1729,12 +1942,26 @@ const appId = typeof __app_id !== 'undefined' ? __app_id : 'monster-siege-learni
             startNewWave();
             audio.startBg();
             document.getElementById('pause-overlay').classList.add('hidden');
+            // Apply Kid Mode UI
+            const sidePanel = document.getElementById('side-panel');
+            if (kidMode) {
+                sidePanel.classList.add('kid-mode-simple');
+            } else {
+                sidePanel.classList.remove('kid-mode-simple');
+            }
+            // Show extra time button in kid mode
+            const extraBtn = document.getElementById('extra-time-btn');
+            if (extraBtn) {
+                if (kidMode) extraBtn.classList.remove('hidden');
+                else extraBtn.classList.add('hidden');
+            }
         }
 
         function triggerGameOver() {
             gameActive = false; gameOver = true;
             audio.stopBg();
             if (mathEngine.timerInterval) clearInterval(mathEngine.timerInterval);
+            if (afkTimerInterval) { clearInterval(afkTimerInterval); afkTimerInterval = null; }
             document.getElementById('end-screen-title').textContent = "Base Defeated";
             document.getElementById('end-screen-title').className = "text-3xl font-black text-rose-500 uppercase tracking-wider";
             document.getElementById('end-wave-val').textContent = wave;
@@ -1746,12 +1973,14 @@ const appId = typeof __app_id !== 'undefined' ? __app_id : 'monster-siege-learni
                 else submitName.value = player.name;
             }
             document.getElementById('game-over-screen').classList.remove('hidden');
+            document.getElementById('endless-mode-box').classList.add('hidden');
         }
 
         function triggerVictory() {
             gameActive = false; gameOver = true;
             audio.stopBg();
             if (mathEngine.timerInterval) clearInterval(mathEngine.timerInterval);
+            if (afkTimerInterval) { clearInterval(afkTimerInterval); afkTimerInterval = null; }
             document.getElementById('end-screen-title').textContent = "🏆 VICTORY!";
             document.getElementById('end-screen-title').className = "text-3xl font-black text-amber-400 uppercase tracking-wider";
             document.getElementById('end-wave-val').textContent = wave;
@@ -1763,17 +1992,48 @@ const appId = typeof __app_id !== 'undefined' ? __app_id : 'monster-siege-learni
                 else submitName.value = player.name;
             }
             document.getElementById('game-over-screen').classList.remove('hidden');
+            document.getElementById('endless-mode-box').classList.remove('hidden');
+        }
+
+        function startEndlessMode() {
+            // Reset game state but keep wave count and continue
+            gameActive = true; gameOver = false; isPaused = false;
+            isEndlessMode = true;
+            baseHp = 100; baseShieldActive = false; baseShieldHp = 0;
+            player.hp = player.maxHp;
+            player.shieldActive = false; player.shieldHp = 0;
+            monsters = []; bullets = []; particles = []; floatingTexts = [];
+            // Keep turrets, scrap, score, wave
+            document.getElementById('game-over-screen').classList.add('hidden');
+            document.getElementById('endless-mode-box').classList.add('hidden');
+            // Reset some stuff
+            consecutiveCorrect = 0; wrongAnswers = 0; unansweredCount = 0;
+            omniActive = false; omniTimeRemaining = 0;
+            afkTimeRemaining = 30; isAFK = false;
+            updateTogglesUI(); updateArmorHUD();
+            // Start from current wave + 1
+            wave = wave + 1;
+            victoryWave = 999999; // No victory condition
+            mathEngine.generate();
+            startMathTimer();
+            startNewWave();
+            audio.startBg();
+            floatingTexts.push(new FloatingText(400, 200, "♾️ ENDLESS MODE ACTIVATED!", "#10b981", 24));
+            updateUI();
         }
 
         function goHome() {
             gameActive = false;
             audio.stopBg();
             if (mathEngine.timerInterval) clearInterval(mathEngine.timerInterval);
+            if (afkTimerInterval) { clearInterval(afkTimerInterval); afkTimerInterval = null; }
             document.getElementById('game-over-screen').classList.add('hidden');
             document.getElementById('home-screen').classList.remove('hidden');
             document.getElementById('pause-overlay').classList.add('hidden');
             if (peer) { peer.destroy(); peer = null; conn = null; }
             isMultiplayer = false; isHost = true; clientPlayer.active = false;
+            isEndlessMode = false;
+            victoryWave = 20;
         }
 
         // ---------- HOME SCREEN FUNCTIONS ----------
@@ -1810,6 +2070,8 @@ const appId = typeof __app_id !== 'undefined' ? __app_id : 'monster-siege-learni
             player.name = nick.toUpperCase();
             document.getElementById('home-screen').classList.add('hidden');
             document.getElementById('room-info-badge').classList.add('hidden');
+            isEndlessMode = false;
+            victoryWave = 20;
             restartGame();
         };
 
@@ -1830,11 +2092,14 @@ const appId = typeof __app_id !== 'undefined' ? __app_id : 'monster-siege-learni
         window.toggleDevTeamModal = toggleDevTeamModal;
         window.toggleAboutModal = toggleAboutModal;
         window.generateRandomNickname = generateRandomNickname;
+        window.useHint = useHint;
+        window.buyExtraTime = buyExtraTime;
+        window.startEndlessMode = startEndlessMode;
 
         // Initialize turretSlots
         turretSlots = TURRET_SLOT_POSITIONS.map(pos => ({ ...pos, turret: null, hovered: false }));
 
-        console.log('🚀 Monster Siege v2.1 – Omni-Shoot as Energy Pool, Math Monsters added.');
+        console.log('🚀 Monster Siege v2.2 – Kid Mode, Hints, AFK Limit, Endless Mode!');
     </script>
 </body>
 </html>
