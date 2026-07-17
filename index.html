@@ -23,19 +23,10 @@
         .turret-hp-fill { height:100%; background:#22c55e; transition:width 0.2s; }
         .hint-glow { animation:hintPulse 0.8s ease-in-out 3; }
         @keyframes hintPulse { 0%,100%{box-shadow:0 0 0 0 rgba(251,191,36,0);} 50%{box-shadow:0 0 30px 10px rgba(251,191,36,0.6);} }
-        .kid-mode .math-panel { border-color:#fbbf24; }
-        .kid-mode .math-panel .timer-bar { background:linear-gradient(to right, #fbbf24, #f59e0b); }
-        .tutorial-highlight { animation:tutorialPulse 1s ease-in-out infinite; }
-        @keyframes tutorialPulse { 0%,100%{box-shadow:0 0 0 0 rgba(251,191,36,0.4);} 50%{box-shadow:0 0 30px 15px rgba(251,191,36,0.7);} }
-        .cheat-modal { backdrop-filter:blur(8px); }
-        .profile-preview { animation:fadeIn 0.3s ease; }
-        @keyframes fadeIn { from { opacity:0; transform:translateY(-5px); } to { opacity:1; transform:translateY(0); } }
-        .achievement-unlock { animation:achievementPop 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
-        @keyframes achievementPop { 0% { transform:scale(0.5); opacity:0; } 100% { transform:scale(1); opacity:1; } }
-        .achievement-grid { scrollbar-width:thin; }
-        .achievement-grid::-webkit-scrollbar { width:4px; }
-        .achievement-grid::-webkit-scrollbar-track { background:rgba(15,23,42,0.6); border-radius:999px; }
-        .achievement-grid::-webkit-scrollbar-thumb { background:#fbbf24; border-radius:999px; }
+        .kid-mode-simple .engineering-station,
+        .kid-mode-simple .toggle-row,
+        .kid-mode-simple .math-streak-badge { display:none !important; }
+        .kid-mode-simple .math-panel { border-color:#fbbf24; }
     </style>
 </head>
 <body class="text-white relative">
@@ -46,35 +37,34 @@
             <h1 class="text-3xl md:text-4xl font-extrabold text-center text-transparent bg-clip-text bg-gradient-to-r from-teal-400 via-indigo-400 to-pink-500 tracking-wider uppercase mb-2">Monster Siege</h1>
             <p class="text-center text-xs text-indigo-300 font-semibold mb-6 uppercase tracking-widest">Learning & defense Edition</p>
 
-            <!-- Player Name with auto-load profile preview -->
-            <div class="mb-4 bg-indigo-900/40 p-3 rounded-2xl border border-indigo-800 relative">
+            <!-- Player Name -->
+            <div class="mb-4 bg-indigo-900/40 p-3 rounded-2xl border border-indigo-800">
                 <label class="block text-xs font-bold text-indigo-300 mb-1.5 uppercase tracking-wide">Choose Your Silly Name</label>
                 <div class="flex gap-2">
                     <input type="text" id="player-nickname-input" placeholder="Type funny name..." maxlength="12" class="flex-grow bg-slate-950 border-2 border-indigo-500 rounded-xl py-2 px-3 text-sm text-center font-bold text-white uppercase tracking-wider focus:outline-none focus:border-pink-500"/>
-                    <button onclick="window.generateRandomNickname()" class="bg-indigo-600 hover:bg-indigo-500 text-white px-3 py-2 rounded-xl text-xs font-bold uppercase transition flex items-center justify-center">
+                    <button onclick="generateRandomNickname()" class="bg-indigo-600 hover:bg-indigo-500 text-white px-3 py-2 rounded-xl text-xs font-bold uppercase transition flex items-center justify-center">
                         <i class="fa-solid fa-dice animate-pulse text-lg"></i>
                     </button>
                 </div>
-                <div id="profile-preview-container" class="mt-2"></div>
             </div>
 
             <!-- Class Selection -->
             <div class="mb-4">
                 <label class="block text-xs font-bold text-indigo-300 mb-2 uppercase tracking-wide">Select your Character Class</label>
                 <div class="grid grid-cols-2 gap-2">
-                    <button onclick="window.selectClass('engineer')" id="class-engineer" class="class-btn p-3 rounded-2xl border-2 border-indigo-500 bg-indigo-900 text-left transition-all duration-150">
+                    <button onclick="selectClass('engineer')" id="class-engineer" class="class-btn p-3 rounded-2xl border-2 border-indigo-500 bg-indigo-900 text-left transition-all duration-150">
                         <div class="font-extrabold text-sm text-teal-400"><i class="fa-solid fa-wrench mr-2"></i>Engineer</div>
                         <div class="text-[10px] text-indigo-200 mt-1">Faster builds & higher turret HP</div>
                     </button>
-                    <button onclick="window.selectClass('gunner')" id="class-gunner" class="class-btn p-3 rounded-2xl border-2 border-slate-700 bg-slate-900/60 text-left transition-all duration-150">
+                    <button onclick="selectClass('gunner')" id="class-gunner" class="class-btn p-3 rounded-2xl border-2 border-slate-700 bg-slate-900/60 text-left transition-all duration-150">
                         <div class="font-extrabold text-sm text-amber-400"><i class="fa-solid fa-gun mr-2"></i>Gunner</div>
                         <div class="text-[10px] text-indigo-200 mt-1">Higher base fire rates</div>
                     </button>
-                    <button onclick="window.selectClass('medic')" id="class-medic" class="class-btn p-3 rounded-2xl border-2 border-slate-700 bg-slate-900/60 text-left transition-all duration-150">
+                    <button onclick="selectClass('medic')" id="class-medic" class="class-btn p-3 rounded-2xl border-2 border-slate-700 bg-slate-900/60 text-left transition-all duration-150">
                         <div class="font-extrabold text-sm text-emerald-400"><i class="fa-solid fa-heart mr-2"></i>Medic</div>
                         <div class="text-[10px] text-indigo-200 mt-1">Regenerate base HP slowly</div>
                     </button>
-                    <button onclick="window.selectClass('commando')" id="class-commando" class="class-btn p-3 rounded-2xl border-2 border-slate-700 bg-slate-900/60 text-left transition-all duration-150">
+                    <button onclick="selectClass('commando')" id="class-commando" class="class-btn p-3 rounded-2xl border-2 border-slate-700 bg-slate-900/60 text-left transition-all duration-150">
                         <div class="font-extrabold text-sm text-rose-400"><i class="fa-solid fa-shield-halved mr-2"></i>Commando</div>
                         <div class="text-[10px] text-indigo-200 mt-1">Slightly more personal damage</div>
                     </button>
@@ -85,15 +75,15 @@
             <div class="mb-4">
                 <label class="block text-xs font-bold text-indigo-300 mb-2 uppercase tracking-wide">Select Speed Difficulty</label>
                 <div class="grid grid-cols-3 gap-2">
-                    <button onclick="window.selectDifficulty('easy')" id="diff-easy" class="diff-btn p-2 rounded-xl border-2 border-slate-700 bg-slate-900/60 text-center transition-all duration-150">
+                    <button onclick="selectDifficulty('easy')" id="diff-easy" class="diff-btn p-2 rounded-xl border-2 border-slate-700 bg-slate-900/60 text-center transition-all duration-150">
                         <div class="font-extrabold text-xs text-emerald-400"><i class="fa-solid fa-face-smile mr-1"></i>Easy</div>
                         <div class="text-[9px] text-indigo-200 mt-0.5">Super Slow</div>
                     </button>
-                    <button onclick="window.selectDifficulty('medium')" id="diff-medium" class="diff-btn p-2 rounded-xl border-2 border-indigo-500 bg-indigo-900 text-center transition-all duration-150">
+                    <button onclick="selectDifficulty('medium')" id="diff-medium" class="diff-btn p-2 rounded-xl border-2 border-indigo-500 bg-indigo-900 text-center transition-all duration-150">
                         <div class="font-extrabold text-xs text-indigo-400"><i class="fa-solid fa-face-meh mr-1"></i>Medium</div>
                         <div class="text-[9px] text-indigo-200 mt-0.5">Standard</div>
                     </button>
-                    <button onclick="window.selectDifficulty('hard')" id="diff-hard" class="diff-btn p-2 rounded-xl border-2 border-slate-700 bg-slate-900/60 text-center transition-all duration-150">
+                    <button onclick="selectDifficulty('hard')" id="diff-hard" class="diff-btn p-2 rounded-xl border-2 border-slate-700 bg-slate-900/60 text-center transition-all duration-150">
                         <div class="font-extrabold text-xs text-rose-400"><i class="fa-solid fa-face-angry mr-1"></i>Hard</div>
                         <div class="text-[9px] text-indigo-200 mt-0.5">Super Fast</div>
                     </button>
@@ -103,13 +93,13 @@
             <!-- Host/Join -->
             <div class="space-y-3 mb-6">
                 <div class="bg-indigo-950/50 border border-indigo-800 rounded-2xl p-3">
-                    <button onclick="window.hostGame()" class="w-full bg-gradient-to-r from-teal-500 to-emerald-600 hover:from-teal-400 hover:to-emerald-500 text-slate-950 font-bold py-2.5 px-4 rounded-xl shadow-lg transform transition active:scale-98 uppercase text-sm flex items-center justify-center gap-2">
+                    <button onclick="hostGame()" class="w-full bg-gradient-to-r from-teal-500 to-emerald-600 hover:from-teal-400 hover:to-emerald-500 text-slate-950 font-bold py-2.5 px-4 rounded-xl shadow-lg transform transition active:scale-98 uppercase text-sm flex items-center justify-center gap-2">
                         <i class="fa-solid fa-tower-broadcast"></i> Host Multiplayer Session
                     </button>
                 </div>
                 <div class="bg-indigo-950/50 border border-indigo-800 rounded-2xl p-3 flex flex-col gap-2">
                     <input type="text" id="join-room-id" placeholder="Enter 5-Char Room ID" class="w-full bg-slate-950/80 border border-indigo-800 rounded-xl py-2 px-3 text-center text-sm font-semibold text-white tracking-widest placeholder-slate-600 focus:outline-none focus:border-indigo-400 uppercase"/>
-                    <button onclick="window.joinGame()" class="w-full bg-gradient-to-r from-indigo-500 to-pink-600 hover:from-indigo-400 hover:to-pink-500 text-white font-bold py-2 px-4 rounded-xl shadow-lg transform transition active:scale-98 uppercase text-sm flex items-center justify-center gap-2">
+                    <button onclick="joinGame()" class="w-full bg-gradient-to-r from-indigo-500 to-pink-600 hover:from-indigo-400 hover:to-pink-500 text-white font-bold py-2 px-4 rounded-xl shadow-lg transform transition active:scale-98 uppercase text-sm flex items-center justify-center gap-2">
                         <i class="fa-solid fa-plug"></i> Join Session
                     </button>
                 </div>
@@ -117,27 +107,18 @@
 
             <!-- Launch & Options -->
             <div class="flex flex-col gap-3">
-                <button onclick="window.launchGame()" id="start-game-btn" class="w-full bg-indigo-500 hover:bg-indigo-400 text-white font-bold py-3 px-6 rounded-2xl shadow-xl transform transition active:scale-95 uppercase text-base flex items-center justify-center gap-2">
+                <button onclick="launchGame()" class="w-full bg-indigo-500 hover:bg-indigo-400 text-white font-bold py-3 px-6 rounded-2xl shadow-xl transform transition active:scale-95 uppercase text-base flex items-center justify-center gap-2">
                     <i class="fa-solid fa-play"></i> Start Singleplayer Game
                 </button>
-                <div class="flex items-center flex-wrap justify-between border-t border-indigo-900 pt-3 gap-2">
+                <div class="flex items-center justify-between border-t border-indigo-900 pt-3">
                     <label class="flex items-center gap-2 cursor-pointer text-indigo-300 text-xs font-semibold uppercase tracking-wider">
                         <input type="checkbox" id="kid-mode-toggle" class="form-checkbox h-4 w-4 text-indigo-600 border-indigo-500 rounded bg-indigo-900 focus:ring-0 focus:ring-offset-0"/>
                         <span>Enable Kid Mode</span>
                     </label>
-                    <div class="flex flex-wrap gap-2">
-                        <button onclick="window.startTutorial()" class="text-xs text-cyan-400 underline hover:text-cyan-300 uppercase tracking-wide font-bold">
-                            <i class="fa-solid fa-graduation-cap mr-1"></i>Tutorial
-                        </button>
-                        <button onclick="window.toggleLeaderboardModal(true)" class="text-xs text-amber-400 underline hover:text-amber-300 uppercase tracking-wide font-bold">Leaderboard</button>
-                        <button onclick="window.openProgressDashboard()" class="text-xs text-emerald-400 underline hover:text-emerald-300 uppercase tracking-wide font-bold">
-                            📊 Progress
-                        </button>
-                        <button onclick="window.openParentDashboard()" class="text-xs text-emerald-400 underline hover:text-emerald-300 uppercase tracking-wide font-bold">
-                            👨‍👩‍👦 Parent
-                        </button>
-                        <button onclick="window.toggleAboutModal(true)" class="text-xs text-indigo-400 underline hover:text-indigo-300 uppercase tracking-wide font-bold">How to Play</button>
-                        <button onclick="window.toggleDevTeamModal(true)" class="text-xs text-pink-400 underline hover:text-pink-300 uppercase tracking-wide font-bold">Devs</button>
+                    <div class="flex gap-2.5">
+                        <button onclick="toggleLeaderboardModal(true)" class="text-xs text-amber-400 underline hover:text-amber-300 uppercase tracking-wide font-bold">Leaderboard</button>
+                        <button onclick="toggleAboutModal(true)" class="text-xs text-indigo-400 underline hover:text-indigo-300 uppercase tracking-wide font-bold">How to Play</button>
+                        <button onclick="toggleDevTeamModal(true)" class="text-xs text-pink-400 underline hover:text-pink-300 uppercase tracking-wide font-bold">Meet the Devs</button>
                     </div>
                 </div>
             </div>
@@ -146,8 +127,6 @@
             <div class="mt-5 border-t border-indigo-900/60 pt-3 text-center text-[10px] text-indigo-400/80 tracking-wide font-medium">
                 <p class="uppercase font-semibold tracking-widest text-indigo-300 mb-0.5">Giggle Byte Games</p>
                 <p>&copy; 2026 Giggle Byte Games. Developed by kids aged 7-13. All Rights Reserved.</p>
-                <p class="text-[8px] text-indigo-500/60 mt-1">💡 Press ` or ↑↑↓↓←→←→BA for cheats</p>
-                <p class="text-[8px] text-amber-500/60 mt-1">🏆 Achievements & progress saved automatically!</p>
             </div>
         </div>
     </div>
@@ -165,42 +144,36 @@
                 </div>
             </div>
             <div class="absolute bottom-4 right-4 flex flex-col gap-2 pointer-events-auto md:hidden z-30">
-                <button onclick="window.toggleOmniShoot()" id="mobile-omni-btn" class="bg-slate-900 text-indigo-400 border border-indigo-900/50 rounded-2xl py-3 px-4 text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-2 shadow-lg transition-all duration-150">
+                <button onclick="toggleOmniShoot()" id="mobile-omni-btn" class="bg-slate-900 text-indigo-400 border border-indigo-900/50 rounded-2xl py-3 px-4 text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-2 shadow-lg transition-all duration-150">
                     <i class="fa-solid fa-compass"></i> Omni: <span id="mobile-omni-status">OFF</span>
                 </button>
-                <button onclick="window.toggleAFKMode()" id="mobile-afk-btn" class="bg-slate-900 text-indigo-400 border border-indigo-900/50 rounded-2xl py-3 px-4 text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-2 shadow-lg transition-all duration-150">
+                <button onclick="toggleAFKMode()" id="mobile-afk-btn" class="bg-slate-900 text-indigo-400 border border-indigo-900/50 rounded-2xl py-3 px-4 text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-2 shadow-lg transition-all duration-150">
                     <i class="fa-solid fa-hourglass"></i> AFK: <span id="mobile-afk-status">OFF</span>
                 </button>
             </div>
 
             <!-- Canvas overlay buttons -->
             <div class="absolute top-4 right-4 flex gap-2">
-                <button onclick="window.toggleAudioMute()" class="p-2.5 rounded-xl bg-slate-950/60 border border-slate-800 text-indigo-400 hover:text-indigo-300 hover:bg-slate-900/60 pointer-events-auto">
+                <button onclick="toggleAudioMute()" class="p-2.5 rounded-xl bg-slate-950/60 border border-slate-800 text-indigo-400 hover:text-indigo-300 hover:bg-slate-900/60 pointer-events-auto">
                     <i id="audio-mute-icon" class="fa-solid fa-volume-high"></i>
                 </button>
-                <button onclick="window.togglePauseGame()" class="p-2.5 rounded-xl bg-slate-950/60 border border-slate-800 text-indigo-400 hover:text-indigo-300 hover:bg-slate-900/60 pointer-events-auto">
+                <button onclick="togglePauseGame()" class="p-2.5 rounded-xl bg-slate-950/60 border border-slate-800 text-indigo-400 hover:text-indigo-300 hover:bg-slate-900/60 pointer-events-auto">
                     <i class="fa-solid fa-pause"></i>
-                </button>
-                <button onclick="window.openProgressDashboard()" class="p-2.5 rounded-xl bg-slate-950/60 border border-slate-800 text-emerald-400 hover:text-emerald-300 hover:bg-slate-900/60 pointer-events-auto">
-                    <i class="fa-solid fa-chart-simple"></i>
                 </button>
             </div>
             <div id="room-info-badge" class="hidden absolute top-4 left-4 bg-slate-950/70 border border-indigo-500/30 px-3 py-1.5 rounded-xl text-xs font-semibold backdrop-blur-sm">
                 <span class="text-indigo-400">ROOM ID:</span> <span id="room-id-val" class="text-indigo-200 uppercase tracking-widest font-mono"></span>
-                <button onclick="window.copyRoomId()" class="ml-2 text-indigo-400 hover:text-indigo-200"><i class="fa-solid fa-copy"></i></button>
+                <button onclick="copyRoomId()" class="ml-2 text-indigo-400 hover:text-indigo-200"><i class="fa-solid fa-copy"></i></button>
             </div>
 
             <!-- Pause overlay -->
             <div id="pause-overlay" class="hidden absolute inset-0 bg-slate-950/80 flex items-center justify-center z-40">
                 <div class="bg-indigo-950/90 border-4 border-indigo-500 rounded-3xl p-6 text-center space-y-4 max-w-sm w-full">
                     <h2 class="text-3xl font-black text-indigo-300">⏸ PAUSED</h2>
-                    <button onclick="window.togglePauseGame()" class="w-full bg-indigo-500 hover:bg-indigo-400 text-white font-bold py-3 rounded-xl uppercase tracking-wider">Resume</button>
-                    <button onclick="window.openProgressDashboard()" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-3 rounded-xl uppercase tracking-wider flex items-center justify-center gap-2">
-                        <i class="fa-solid fa-chart-simple"></i> Progress Report
-                    </button>
-                    <button onclick="window.restartGame()" class="w-full bg-teal-500 hover:bg-teal-400 text-slate-950 font-bold py-3 rounded-xl uppercase tracking-wider">Restart</button>
-                    <button onclick="window.goHome()" class="w-full bg-slate-800 hover:bg-slate-700 text-indigo-300 font-bold py-3 rounded-xl uppercase tracking-wider">Main Menu</button>
-                    <button onclick="window.toggleAudioMute()" class="w-full bg-slate-800 hover:bg-slate-700 text-indigo-300 font-bold py-3 rounded-xl uppercase tracking-wider flex items-center justify-center gap-2">
+                    <button onclick="togglePauseGame()" class="w-full bg-indigo-500 hover:bg-indigo-400 text-white font-bold py-3 rounded-xl uppercase tracking-wider">Resume</button>
+                    <button onclick="restartGame()" class="w-full bg-teal-500 hover:bg-teal-400 text-slate-950 font-bold py-3 rounded-xl uppercase tracking-wider">Restart</button>
+                    <button onclick="goHome()" class="w-full bg-slate-800 hover:bg-slate-700 text-indigo-300 font-bold py-3 rounded-xl uppercase tracking-wider">Main Menu</button>
+                    <button onclick="toggleAudioMute()" class="w-full bg-slate-800 hover:bg-slate-700 text-indigo-300 font-bold py-3 rounded-xl uppercase tracking-wider flex items-center justify-center gap-2">
                         <i class="fa-solid fa-volume-high"></i> Toggle Sound
                     </button>
                 </div>
@@ -210,7 +183,7 @@
         <!-- Side panel -->
         <div id="side-panel" class="w-full lg:w-[420px] flex-shrink-0 bg-slate-950 border-t lg:border-t-0 lg:border-l border-indigo-950 p-3 flex flex-col justify-between overflow-y-auto h-[40vh] lg:h-full gap-3 relative">
             <!-- HUD -->
-            <div class="bg-indigo-950/40 border border-indigo-900 rounded-2xl p-3 flex justify-between items-center relative" id="hud-panel">
+            <div class="bg-indigo-950/40 border border-indigo-900 rounded-2xl p-3 flex justify-between items-center relative">
                 <div class="flex items-center gap-3">
                     <div class="w-10 h-10 bg-indigo-500/10 border border-indigo-500 rounded-xl flex items-center justify-center">
                         <i class="fa-solid fa-fortress text-indigo-400"></i>
@@ -234,19 +207,21 @@
                 <div class="flex justify-between items-center">
                     <span class="text-[10px] text-indigo-300 font-bold uppercase tracking-widest">Continuous Learning Engine</span>
                     <div class="flex items-center gap-2">
-                        <span id="math-streak-badge" class="hidden bg-amber-500 text-slate-950 text-[10px] font-black px-2 py-0.5 rounded-full uppercase animate-bounce">
+                        <span id="math-streak-badge" class="hidden bg-amber-500 text-slate-950 text-[10px] font-black px-2 py-0.5 rounded-full uppercase animate-bounce math-streak-badge">
                             <i class="fa-solid fa-fire mr-1"></i>Streak <span id="math-streak-val">0</span>
                         </span>
-                        <button onclick="window.useHint()" id="hint-btn" class="bg-amber-600/80 hover:bg-amber-500 text-white text-[10px] font-bold px-2.5 py-1 rounded-full uppercase transition flex items-center gap-1 shadow-lg" title="Use 50 scrap to reveal the correct answer">
+                        <!-- Hint Button -->
+                        <button onclick="useHint()" id="hint-btn" class="bg-amber-600/80 hover:bg-amber-500 text-white text-[10px] font-bold px-2.5 py-1 rounded-full uppercase transition flex items-center gap-1 shadow-lg" title="Use 50 scrap to reveal the correct answer">
                             <i class="fa-solid fa-lightbulb text-amber-300"></i> Hint
                         </button>
-                        <button onclick="window.buyExtraTime()" id="extra-time-btn" class="bg-emerald-600/80 hover:bg-emerald-500 text-white text-[10px] font-bold px-2.5 py-1 rounded-full uppercase transition flex items-center gap-1 shadow-lg" title="+10 seconds (costs 30 scrap)">
+                        <!-- Extra Time Button (Kid Mode) -->
+                        <button onclick="buyExtraTime()" id="extra-time-btn" class="bg-emerald-600/80 hover:bg-emerald-500 text-white text-[10px] font-bold px-2.5 py-1 rounded-full uppercase transition flex items-center gap-1 shadow-lg hidden" title="+10 seconds (costs 30 scrap)">
                             <i class="fa-regular fa-clock"></i> +10s
                         </button>
                     </div>
                 </div>
                 <div class="w-full bg-slate-950/60 h-2.5 rounded-full overflow-hidden border border-slate-900 mb-1 relative">
-                    <div id="math-timer-bar" class="timer-bar bg-gradient-to-r from-emerald-400 to-teal-500 h-full w-full transition-all duration-100"></div>
+                    <div id="math-timer-bar" class="bg-gradient-to-r from-emerald-400 to-teal-500 h-full w-full transition-all duration-100"></div>
                 </div>
                 <div id="math-question-box" class="bg-slate-950/40 border border-slate-800 rounded-xl p-3 text-center min-h-[48px] flex items-center justify-center relative">
                     <p id="math-question-text" class="text-sm font-bold text-slate-100 tracking-wide">Connecting...</p>
@@ -255,25 +230,25 @@
             </div>
 
             <!-- Engineering Station -->
-            <div id="engineering-station" class="bg-indigo-950/20 border border-indigo-950 rounded-2xl p-3">
+            <div id="engineering-station" class="bg-indigo-950/20 border border-indigo-950 rounded-2xl p-3 engineering-station">
                 <h3 class="text-xs font-bold text-indigo-300 uppercase tracking-widest mb-2"><i class="fa-solid fa-hammer mr-1.5"></i>Engineering Station</h3>
                 <div class="grid grid-cols-2 gap-2">
-                    <button onclick="window.buyGear('turret-basic')" class="flex flex-col items-start bg-indigo-950/80 hover:bg-indigo-900 border border-indigo-900 p-2.5 rounded-xl transition duration-150 relative">
+                    <button onclick="buyGear('turret-basic')" class="flex flex-col items-start bg-indigo-950/80 hover:bg-indigo-900 border border-indigo-900 p-2.5 rounded-xl transition duration-150 relative">
                         <div class="text-[11px] font-bold text-indigo-200">Basic Turret</div>
                         <div class="text-[10px] text-slate-400 mt-0.5">Reliable Single-Target</div>
                         <span class="text-xs text-amber-400 font-black mt-1.5"><i class="fa-solid fa-cubes mr-1"></i>100</span>
                     </button>
-                    <button onclick="window.buyGear('turret-aoe')" class="flex flex-col items-start bg-indigo-950/80 hover:bg-indigo-900 border border-indigo-900 p-2.5 rounded-xl transition duration-150 relative">
+                    <button onclick="buyGear('turret-aoe')" class="flex flex-col items-start bg-indigo-950/80 hover:bg-indigo-900 border border-indigo-900 p-2.5 rounded-xl transition duration-150 relative">
                         <div class="text-[11px] font-bold text-indigo-200">Plasma Wave (AOE)</div>
                         <div class="text-[10px] text-slate-400 mt-0.5">Multi-Target Shockwave</div>
                         <span class="text-xs text-amber-400 font-black mt-1.5"><i class="fa-solid fa-cubes mr-1"></i>250</span>
                     </button>
-                    <button onclick="window.buyGear('turret-rapid')" class="flex flex-col items-start bg-indigo-950/80 hover:bg-indigo-900 border border-indigo-900 p-2.5 rounded-xl transition duration-150 relative">
+                    <button onclick="buyGear('turret-rapid')" class="flex flex-col items-start bg-indigo-950/80 hover:bg-indigo-900 border border-indigo-900 p-2.5 rounded-xl transition duration-150 relative">
                         <div class="text-[11px] font-bold text-indigo-200">Gatling (Rapid)</div>
                         <div class="text-[10px] text-slate-400 mt-0.5">High Speed Shredder</div>
                         <span class="text-xs text-amber-400 font-black mt-1.5"><i class="fa-solid fa-cubes mr-1"></i>200</span>
                     </button>
-                    <button onclick="window.buyGear('turret-sniper')" class="flex flex-col items-start bg-indigo-950/80 hover:bg-indigo-900 border border-indigo-900 p-2.5 rounded-xl transition duration-150 relative">
+                    <button onclick="buyGear('turret-sniper')" class="flex flex-col items-start bg-indigo-950/80 hover:bg-indigo-900 border border-indigo-900 p-2.5 rounded-xl transition duration-150 relative">
                         <div class="text-[11px] font-bold text-indigo-200">Railgun (Sniper)</div>
                         <div class="text-[10px] text-slate-400 mt-0.5">Extreme range & piercing</div>
                         <span class="text-xs text-amber-400 font-black mt-1.5"><i class="fa-solid fa-cubes mr-1"></i>300</span>
@@ -282,11 +257,11 @@
             </div>
 
             <!-- Toggles -->
-            <div class="flex gap-2">
-                <button onclick="window.toggleOmniShoot()" id="omni-shoot-btn" class="flex-grow bg-slate-900 hover:bg-indigo-950 text-indigo-400 hover:text-indigo-300 border border-indigo-900/50 rounded-xl py-2 px-3 text-xs font-bold uppercase transition flex items-center justify-center gap-1.5">
+            <div class="flex gap-2 toggle-row">
+                <button onclick="toggleOmniShoot()" id="omni-shoot-btn" class="flex-grow bg-slate-900 hover:bg-indigo-950 text-indigo-400 hover:text-indigo-300 border border-indigo-900/50 rounded-xl py-2 px-3 text-xs font-bold uppercase transition flex items-center justify-center gap-1.5">
                     <i class="fa-solid fa-compass"></i> Omni-Shoot: <span id="omni-status">OFF</span>
                 </button>
-                <button onclick="window.toggleAFKMode()" id="afk-mode-btn" class="flex-grow bg-slate-900 hover:bg-indigo-950 text-indigo-400 hover:text-indigo-300 border border-indigo-900/50 rounded-xl py-2 px-3 text-xs font-bold uppercase transition flex items-center justify-center gap-1.5">
+                <button onclick="toggleAFKMode()" id="afk-mode-btn" class="flex-grow bg-slate-900 hover:bg-indigo-950 text-indigo-400 hover:text-indigo-300 border border-indigo-900/50 rounded-xl py-2 px-3 text-xs font-bold uppercase transition flex items-center justify-center gap-1.5">
                     <i class="fa-solid fa-hourglass"></i> AFK Shoot: <span id="afk-status">OFF</span>
                 </button>
             </div>
@@ -294,17 +269,13 @@
             <div id="afk-cost-indicator" class="hidden text-center text-[10px] text-amber-400 font-mono bg-slate-950/60 rounded-xl py-1.5 border border-amber-500/30">
                 ⏱ <span id="afk-time-remaining">30</span>s remaining · <span id="afk-cost-per-sec">5</span> scrap/sec
             </div>
-            <!-- Cheat indicator -->
-            <div id="cheat-indicator" class="hidden text-center text-[10px] text-amber-400 font-mono bg-slate-950/60 rounded-xl py-1 px-2 border border-amber-500/30">
-                ✨ Cheats: <span id="cheat-uses-left">3</span> left · press ` or ↑↑↓↓←→←→BA
-            </div>
         </div>
     </div>
 
     <!-- Placement toolbar -->
     <div id="placement-toolbar" class="hidden absolute top-4 left-1/2 -translate-x-1/2 bg-slate-950/90 border-2 border-amber-500 rounded-2xl p-3 flex items-center gap-4 shadow-2xl z-40 pointer-events-auto">
         <span class="text-xs font-bold text-amber-400 uppercase tracking-widest"><i class="fa-solid fa-compass-drafting animate-spin mr-1"></i> Placing Turret</span>
-        <button onclick="window.cancelTurretPlacement()" class="bg-rose-600 hover:bg-rose-500 text-white text-xs font-extrabold px-3 py-1.5 rounded-xl uppercase transition">Cancel</button>
+        <button onclick="cancelTurretPlacement()" class="bg-rose-600 hover:bg-rose-500 text-white text-xs font-extrabold px-3 py-1.5 rounded-xl uppercase transition">Cancel</button>
     </div>
 
     <!-- Game Over / Victory -->
@@ -315,27 +286,22 @@
                 <div>Wave Reached: <span id="end-wave-val" class="text-teal-400 font-bold">1</span></div>
                 <div>Monsters Killed: <span id="end-kills-val" class="text-teal-400 font-bold">0</span></div>
                 <div>Math Streaks Met: <span id="end-math-streak-val" class="text-teal-400 font-bold">0</span></div>
-                <div>🏆 New Achievements: <span id="end-achievements-count" class="text-amber-400 font-bold">0</span></div>
             </div>
-            <div id="end-achievements-list" class="bg-slate-950/60 rounded-2xl p-3 text-xs text-amber-300 hidden"></div>
             <div id="leaderboard-submit-box" class="bg-slate-950/60 rounded-2xl p-4 text-center space-y-2 border border-indigo-900/40">
                 <label class="block text-xs font-bold text-indigo-300 uppercase tracking-wider">Join the Giggle Hall of Fame!</label>
                 <div class="flex flex-col gap-2">
                     <input type="text" id="leaderboard-name-input" placeholder="Wacky Nickname" maxlength="25" class="w-full bg-slate-900 border border-indigo-800 rounded-xl py-2 px-3 text-sm text-center text-white focus:outline-none focus:border-indigo-500 font-bold uppercase"/>
-                    <button onclick="window.submitScore()" id="btn-submit-score" class="w-full bg-amber-500 hover:bg-amber-400 text-slate-950 font-black py-2.5 rounded-xl text-xs uppercase tracking-wide transition">Submit Score</button>
+                    <button onclick="submitScore()" id="btn-submit-score" class="w-full bg-amber-500 hover:bg-amber-400 text-slate-950 font-black py-2.5 rounded-xl text-xs uppercase tracking-wide transition">Submit Score</button>
                 </div>
             </div>
             <div id="endless-mode-box" class="hidden bg-slate-950/60 rounded-2xl p-3 border border-emerald-500/30">
-                <button onclick="window.startEndlessMode()" id="btn-endless-mode" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-black py-2.5 rounded-xl text-xs uppercase tracking-wide transition flex items-center justify-center gap-2">
+                <button onclick="startEndlessMode()" id="btn-endless-mode" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-black py-2.5 rounded-xl text-xs uppercase tracking-wide transition flex items-center justify-center gap-2">
                     <i class="fa-solid fa-infinity"></i> Continue to Endless Mode
                 </button>
                 <p class="text-[10px] text-emerald-300/60 mt-1">No victory condition — survive as long as you can!</p>
             </div>
-            <button onclick="window.restartGame()" class="w-full bg-teal-500 hover:bg-teal-400 text-slate-950 font-black py-3 px-6 rounded-2xl shadow-lg uppercase tracking-widest transform transition active:scale-95">Play Again</button>
-            <button onclick="window.goHome()" class="w-full bg-slate-900 hover:bg-slate-800 text-indigo-400 py-2 rounded-xl text-xs font-bold uppercase transition">Return to Menu</button>
-            <button onclick="window.openProgressDashboard()" class="w-full bg-emerald-700/50 hover:bg-emerald-700 text-emerald-300 py-2 rounded-xl text-xs font-bold uppercase transition flex items-center justify-center gap-2">
-                <i class="fa-solid fa-chart-simple"></i> View Progress
-            </button>
+            <button onclick="restartGame()" class="w-full bg-teal-500 hover:bg-teal-400 text-slate-950 font-black py-3 px-6 rounded-2xl shadow-lg uppercase tracking-widest transform transition active:scale-95">Play Again</button>
+            <button onclick="goHome()" class="w-full bg-slate-900 hover:bg-slate-800 text-indigo-400 py-2 rounded-xl text-xs font-bold uppercase transition">Return to Menu</button>
         </div>
     </div>
 
@@ -352,11 +318,8 @@
                 <p>6. <span class="font-bold text-teal-400">Survive 20 waves</span> to claim victory!</p>
                 <p>7. <span class="font-bold text-purple-400">Math Monsters</span> (❓) can only be destroyed by answering a math question correctly – bullets don't hurt them!</p>
                 <p class="text-amber-300 text-xs border-t border-indigo-800/40 pt-2 mt-1">💡 <span class="font-bold">Hint:</span> Use the <span class="text-amber-400">💡 Hint</span> button (50 scrap) to reveal the correct answer! In Kid Mode, you get <span class="text-emerald-400">+10s extra time</span> for 30 scrap.</p>
-                <p class="text-cyan-300 text-xs border-t border-indigo-800/40 pt-2 mt-1">🎮 <span class="font-bold">Tutorial:</span> Click the <span class="text-cyan-400">🎓 Tutorial</span> button on the home screen for a guided walkthrough.</p>
-                <p class="text-amber-300 text-xs border-t border-indigo-800/40 pt-2 mt-1">✨ <span class="font-bold">Cheats:</span> Press <span class="text-amber-400">`</span> or <span class="text-amber-400">↑↑↓↓←→←→BA</span> to open the cheat console (3 uses per game).</p>
-                <p class="text-emerald-300 text-xs border-t border-indigo-800/40 pt-2 mt-1">🏆 <span class="font-bold">Achievements:</span> Your progress is saved automatically! Unlock badges and earn bonus scrap.</p>
             </div>
-            <button onclick="window.toggleAboutModal(false)" class="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-2 px-4 rounded-xl uppercase transition">Close</button>
+            <button onclick="toggleAboutModal(false)" class="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-2 px-4 rounded-xl uppercase transition">Close</button>
         </div>
     </div>
 
@@ -375,7 +338,7 @@
             <div id="leaderboard-list" class="max-h-[220px] overflow-y-auto pr-1">
                 <div class="text-center text-indigo-300 py-4 italic text-sm">Loading defenders...</div>
             </div>
-            <button onclick="window.toggleLeaderboardModal(false)" class="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-2 px-4 rounded-xl uppercase transition">Back to Safety</button>
+            <button onclick="toggleLeaderboardModal(false)" class="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-2 px-4 rounded-xl uppercase transition">Back to Safety</button>
         </div>
     </div>
 
@@ -388,59 +351,61 @@
                 <p class="text-xs text-indigo-300 mt-1 italic">"We develop during school recess and after dinner."</p>
             </div>
             <div class="space-y-3.5 mt-2">
+                <!-- Sid -->
                 <div class="bg-slate-900/60 border border-indigo-500/20 p-3 rounded-2xl flex gap-3.5 items-start">
                     <div class="w-10 h-10 bg-amber-500/10 border border-amber-500 text-amber-400 rounded-xl flex items-center justify-center text-lg flex-shrink-0"><i class="fa-solid fa-crown"></i></div>
                     <div><div class="flex items-baseline gap-2"><h4 class="font-bold text-sm text-white">Sid (10)</h4><span class="text-[9px] bg-amber-500/20 text-amber-300 px-1.5 py-0.5 rounded-full font-bold uppercase tracking-wide">The "CEO"</span></div><p class="text-xs text-indigo-200/90 mt-1 leading-relaxed">Spends his entire shift reminding everyone he is the CEO. Claims every idea is his, does absolutely nothing, and rage-quits the game the moment it stops being fun.</p></div>
                 </div>
+                <!-- Abhi -->
                 <div class="bg-slate-900/60 border border-indigo-500/20 p-3 rounded-2xl flex gap-3.5 items-start">
                     <div class="w-10 h-10 bg-teal-500/10 border border-teal-500 text-teal-400 rounded-xl flex items-center justify-center text-lg flex-shrink-0"><i class="fa-solid fa-code"></i></div>
                     <div><div class="flex items-baseline gap-2"><h4 class="font-bold text-sm text-white">Abhi (13)</h4><span class="text-[9px] bg-teal-500/20 text-teal-300 px-1.5 py-0.5 rounded-full font-bold uppercase tracking-wide">Pro Gamer</span></div><p class="text-xs text-indigo-200/90 mt-1 leading-relaxed">Productivity is at 0%, but his high scores are at 100%. If he isn't sleeping or slacking off, he's destroying the leaderboard. Coding? Never heard of her.</p></div>
                 </div>
+                <!-- Nishi -->
                 <div class="bg-slate-900/60 border border-indigo-500/20 p-3 rounded-2xl flex gap-3.5 items-start">
                     <div class="w-10 h-10 bg-rose-500/10 border border-rose-500 text-rose-400 rounded-xl flex items-center justify-center text-lg flex-shrink-0"><i class="fa-solid fa-bug-slash"></i></div>
                     <div><div class="flex items-baseline gap-2"><h4 class="font-bold text-sm text-white">Nishi (8)</h4><span class="text-[9px] bg-rose-500/20 text-rose-300 px-1.5 py-0.5 rounded-full font-bold uppercase tracking-wide">QA Critic</span></div><p class="text-xs text-indigo-200/90 mt-1 leading-relaxed">Expert at shouting "It's not working!" while demanding the game be set to easy mode for all math problems. Pure vibes, zero effort.</p></div>
                 </div>
+                <!-- Anika -->
                 <div class="bg-slate-900/60 border border-indigo-500/20 p-3 rounded-2xl flex gap-3.5 items-start">
                     <div class="w-10 h-10 bg-pink-500/10 border border-pink-500 text-pink-400 rounded-xl flex items-center justify-center text-lg flex-shrink-0"><i class="fa-solid fa-wand-magic-sparkles"></i></div>
                     <div><div class="flex items-baseline gap-2"><h4 class="font-bold text-sm text-white">Anika (7)</h4><span class="text-[9px] bg-pink-500/20 text-pink-300 px-1.5 py-0.5 rounded-full font-bold uppercase tracking-wide">Chaos Consultant</span></div><p class="text-xs text-indigo-200/90 mt-1 leading-relaxed">Here for the fun and the silly inputs. If it isn't set to "Easy Mode," she isn't interested. Our resident expert in purely whimsical feedback.</p></div>
                 </div>
             </div>
-            <button onclick="window.toggleDevTeamModal(false)" class="w-full bg-pink-600 hover:bg-pink-500 text-white font-bold py-2.5 px-4 rounded-xl uppercase transition text-xs tracking-wider mt-2">Back to the Studio</button>
+            <button onclick="toggleDevTeamModal(false)" class="w-full bg-pink-600 hover:bg-pink-500 text-white font-bold py-2.5 px-4 rounded-xl uppercase transition text-xs tracking-wider mt-2">Back to the Studio</button>
         </div>
     </div>
 
     <script type="module">
         // ============================================================
-        //  MONSTER SIEGE — v2.4 WITH STORAGE & ACHIEVEMENTS
-        //  Features: Kid Mode (all UI visible), Cheat Codes, Progress Dashboard,
-        //            Tutorial, localStorage Profiles, 20+ Achievements,
-        //            Auto-load on name, Parent Dashboard, Welcome Back
+        //  MONSTER SIEGE — v2.2 WITH KID MODE, HINTS, AFK LIMIT, ENDLESS
         // ============================================================
+// ---------- IMPORTS (Firebase) ----------
+import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+import { getAnalytics } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-analytics.js";
+import { getAuth, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+import { getFirestore, collection, addDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-        // ---------- IMPORTS (Firebase) ----------
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAnalytics } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-analytics.js";
-        import { getAuth, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, collection, addDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+// ---------- FIREBASE CONFIG ----------
+const firebaseConfig = {
+  apiKey: "AIzaSyCCcwFKCGw_Te21xRq9jOzII0PqS8n78qM",
+  authDomain: "monster-siege-kids.firebaseapp.com",
+  projectId: "monster-siege-kids",
+  storageBucket: "monster-siege-kids.firebasestorage.app",
+  messagingSenderId: "982107635775",
+  appId: "1:982107635775:web:be655369e66ceeccf6388a",
+  measurementId: "G-HTM55F9E75"
+};
 
-        // ---------- FIREBASE CONFIG ----------
-        const firebaseConfig = {
-          apiKey: "AIzaSyCCcwFKCGw_Te21xRq9jOzII0PqS8n78qM",
-          authDomain: "monster-siege-kids.firebaseapp.com",
-          projectId: "monster-siege-kids",
-          storageBucket: "monster-siege-kids.firebasestorage.app",
-          messagingSenderId: "982107635775",
-          appId: "1:982107635775:web:be655369e66ceeccf6388a",
-          measurementId: "G-HTM55F9E75"
-        };
+// ---------- OTHER CONFIG ----------
+const appId = typeof __app_id !== 'undefined' ? __app_id : 'monster-siege-learning';
 
-        const appId = typeof __app_id !== 'undefined' ? __app_id : 'monster-siege-learning';
 
-        let useMockDatabase = false;
+       let useMockDatabase = false;
         let app, auth, db;
         try {
             if (firebaseConfig.apiKey === "mock-api-key") useMockDatabase = true;
-            else { app = initializeApp(firebaseConfig); auth = getAuth(app); db = getFirestore(app); }
+            else { app = initializeApp(firebaseConfig); auth = getAuth(app); db = getFirestore(app); const analytics = getAnalytics(app);}
         } catch(e) { useMockDatabase = true; }
 
         let currentUser = null, currentUserId = null;
@@ -523,201 +488,6 @@
         function toggleDevTeamModal(show) { document.getElementById('dev-team-modal').classList.toggle('hidden', !show); }
         function toggleAboutModal(show) { document.getElementById('about-modal').classList.toggle('hidden', !show); }
 
-        // ============================================================
-        //  STORAGE MANAGER with Achievements
-        // ============================================================
-
-        const ACHIEVEMENTS = {
-            firstBlood: { id: 'firstBlood', name: '🩸 First Blood', description: 'Defeat your first monster', icon: 'fa-skull', condition: (stats) => stats.totalKills >= 1, reward: 50 },
-            streakStarter: { id: 'streakStarter', name: '🔥 Streak Starter', description: 'Achieve a streak of 3 correct answers', icon: 'fa-fire', condition: (stats) => stats.maxStreakEver >= 3, reward: 50 },
-            streakMaster: { id: 'streakMaster', name: '🔥 Streak Master', description: 'Achieve a streak of 10 correct answers', icon: 'fa-fire', condition: (stats) => stats.maxStreakEver >= 10, reward: 200 },
-            wave5: { id: 'wave5', name: '⚔️ Wave 5', description: 'Reach wave 5', icon: 'fa-shield-halved', condition: (stats) => stats.bestWaveEver >= 5, reward: 100 },
-            waveWarrior: { id: 'waveWarrior', name: '⚔️ Wave Warrior', description: 'Reach wave 10', icon: 'fa-shield-halved', condition: (stats) => stats.bestWaveEver >= 10, reward: 150 },
-            waveChampion: { id: 'waveChampion', name: '⚔️ Wave Champion', description: 'Reach wave 15', icon: 'fa-shield-halved', condition: (stats) => stats.bestWaveEver >= 15, reward: 250 },
-            defender: { id: 'defender', name: '🏰 Defender', description: 'Reach wave 20 and win the game', icon: 'fa-crown', condition: (stats) => stats.bestWaveEver >= 20, reward: 1000 },
-            endlessSurvivor: { id: 'endlessSurvivor', name: '♾️ Endless Survivor', description: 'Survive 30 waves in Endless Mode', icon: 'fa-infinity', condition: (stats) => stats.isEndlessSurvivor === true, reward: 1500 },
-            slayer: { id: 'slayer', name: '💀 Slayer', description: 'Defeat 50 monsters total', icon: 'fa-dragon', condition: (stats) => stats.totalKills >= 50, reward: 150 },
-            monsterSlayer: { id: 'monsterSlayer', name: '💀 Monster Slayer', description: 'Defeat 100 monsters total', icon: 'fa-dragon', condition: (stats) => stats.totalKills >= 100, reward: 300 },
-            legendarySlayer: { id: 'legendarySlayer', name: '💀 Legendary Slayer', description: 'Defeat 500 monsters total', icon: 'fa-dragon', condition: (stats) => stats.totalKills >= 500, reward: 800 },
-            mathPro: { id: 'mathPro', name: '🧠 Math Pro', description: 'Get 10 math streaks (monster wipes)', icon: 'fa-brain', condition: (stats) => stats.totalMathStreaks >= 10, reward: 250 },
-            mathGenius: { id: 'mathGenius', name: '🧠 Math Genius', description: 'Get 20 math streaks (monster wipes)', icon: 'fa-brain', condition: (stats) => stats.totalMathStreaks >= 20, reward: 500 },
-            scrapCollector: { id: 'scrapCollector', name: '💰 Scrap Collector', description: 'Collect 5,000 scrap total', icon: 'fa-coins', condition: (stats) => stats.totalScrapCollected >= 5000, reward: 300 },
-            scrapHoarder: { id: 'scrapHoarder', name: '💰 Scrap Hoarder', description: 'Collect 10,000 scrap total', icon: 'fa-coins', condition: (stats) => stats.totalScrapCollected >= 10000, reward: 800 },
-            builder: { id: 'builder', name: '🔧 Builder', description: 'Build 5 turrets total', icon: 'fa-wrench', condition: (stats) => stats.totalTurretsBuilt >= 5, reward: 150 },
-            masterEngineer: { id: 'masterEngineer', name: '🔧 Master Engineer', description: 'Build 10 turrets total', icon: 'fa-wrench', condition: (stats) => stats.totalTurretsBuilt >= 10, reward: 300 },
-            upgrader: { id: 'upgrader', name: '🎯 Upgrader', description: 'Upgrade a turret to level 3', icon: 'fa-crosshairs', condition: (stats) => stats.maxTurretLevel >= 3, reward: 150 },
-            sniper: { id: 'sniper', name: '🎯 Sniper', description: 'Upgrade a turret to level 5', icon: 'fa-crosshairs', condition: (stats) => stats.maxTurretLevel >= 5, reward: 350 },
-            omniUser: { id: 'omniUser', name: '💥 Omni‑User', description: 'Activate Omni‑Shoot 3 times total', icon: 'fa-compass', condition: (stats) => (stats.omniUses || 0) >= 3, reward: 250 },
-            afkPro: { id: 'afkPro', name: '🤖 AFK Pro', description: 'Use AFK mode for a total of 60 seconds', icon: 'fa-hourglass-half', condition: (stats) => (stats.totalAfkSeconds || 0) >= 60, reward: 200 },
-            perfectWave: { id: 'perfectWave', name: '✨ Perfect Wave', description: 'Complete a wave with no HP loss', icon: 'fa-star', condition: (stats) => (stats.perfectWaves || 0) >= 1, reward: 250 },
-            allAchievements: { id: 'allAchievements', name: '🏆 Legend', description: 'Unlock all other achievements', icon: 'fa-trophy', condition: (stats) => {
-                const total = Object.keys(ACHIEVEMENTS).length - 1;
-                const unlocked = (stats.unlockedAchievements || []).length;
-                return unlocked >= total;
-            }, reward: 5000 }
-        };
-
-        class StorageManager {
-            constructor() {
-                this.storageKey = 'monsterSiege_players_v2';
-                this.players = this.loadAll();
-            }
-
-            loadAll() {
-                try {
-                    const data = localStorage.getItem(this.storageKey);
-                    return data ? JSON.parse(data) : {};
-                } catch { return {}; }
-            }
-
-            saveAll() {
-                localStorage.setItem(this.storageKey, JSON.stringify(this.players));
-            }
-
-            getPlayer(username) {
-                const key = username.toLowerCase().trim();
-                if (!this.players[key]) {
-                    this.players[key] = this.createNewProfile(username);
-                    this.saveAll();
-                }
-                return this.players[key];
-            }
-
-            createNewProfile(username) {
-                return {
-                    username: username.trim(),
-                    displayName: username.trim(),
-                    classType: 'engineer',
-                    kidModeEnabled: false,
-                    difficulty: 'medium',
-                    totalPlayTime: 0,
-                    lastPlayed: new Date().toISOString(),
-                    gamesPlayed: 0,
-                    totalScore: 0,
-                    totalKills: 0,
-                    totalWavesReached: 0,
-                    totalMathStreaks: 0,
-                    maxStreakEver: 0,
-                    bestWaveEver: 0,
-                    bestScoreEver: 0,
-                    mostKillsInGame: 0,
-                    totalScrapCollected: 0,
-                    totalTurretsBuilt: 0,
-                    maxTurretLevel: 0,
-                    omniUses: 0,
-                    totalAfkSeconds: 0,
-                    perfectWaves: 0,
-                    isEndlessSurvivor: false,
-                    unlockedAchievements: [],
-                    _pendingReward: 0
-                };
-            }
-
-            updatePlayer(username, updates) {
-                const key = username.toLowerCase().trim();
-                if (!this.players[key]) {
-                    this.players[key] = this.createNewProfile(username);
-                }
-                Object.assign(this.players[key], updates);
-                this.players[key].lastPlayed = new Date().toISOString();
-                this.saveAll();
-                return this.players[key];
-            }
-
-            getAchievements(username) {
-                const profile = this.getPlayer(username);
-                const unlocked = profile.unlockedAchievements || [];
-                return Object.values(ACHIEVEMENTS).map(ach => ({
-                    ...ach,
-                    unlocked: unlocked.includes(ach.id)
-                }));
-            }
-
-            checkAchievements(username) {
-                const profile = this.getPlayer(username);
-                const unlocked = new Set(profile.unlockedAchievements || []);
-                const newlyUnlocked = [];
-
-                Object.values(ACHIEVEMENTS).forEach(ach => {
-                    if (!unlocked.has(ach.id) && ach.condition(profile)) {
-                        unlocked.add(ach.id);
-                        newlyUnlocked.push(ach);
-                        if (ach.reward) {
-                            profile._pendingReward = (profile._pendingReward || 0) + ach.reward;
-                        }
-                    }
-                });
-
-                if (newlyUnlocked.length > 0) {
-                    profile.unlockedAchievements = Array.from(unlocked);
-                    this.saveAll();
-                }
-
-                return newlyUnlocked;
-            }
-
-            getProfilePreview(username) {
-                const profile = this.getPlayer(username);
-                const total = Object.keys(ACHIEVEMENTS).length;
-                const unlocked = (profile.unlockedAchievements || []).length;
-                return {
-                    gamesPlayed: profile.gamesPlayed,
-                    totalScore: profile.totalScore,
-                    maxStreak: profile.maxStreakEver,
-                    achievements: unlocked,
-                    totalAchievements: total,
-                    bestWave: profile.bestWaveEver
-                };
-            }
-        }
-
-        const storage = new StorageManager();
-
-        // ---------- PROFILE AUTO-LOAD ----------
-        function showProfilePreview(username) {
-            const container = document.getElementById('profile-preview-container');
-            if (!username || username.length < 1) {
-                container.innerHTML = '';
-                return;
-            }
-            try {
-                const preview = storage.getProfilePreview(username);
-                if (preview.gamesPlayed === 0) {
-                    container.innerHTML = `
-                        <div class="text-[10px] text-indigo-300/60 italic p-1">✨ New defender! Ready for your first game?</div>
-                    `;
-                    return;
-                }
-                container.innerHTML = `
-                    <div class="text-[10px] text-indigo-300 bg-indigo-900/40 rounded-xl p-2 border border-indigo-800/50 profile-preview">
-                        <div class="flex justify-between items-center">
-                            <span>🎮 ${preview.gamesPlayed} games</span>
-                            <span>⭐ ${preview.totalScore.toLocaleString()} pts</span>
-                            <span>🔥 ${preview.maxStreak} max streak</span>
-                            <span>🏅 ${preview.achievements}/${preview.totalAchievements}</span>
-                            <span class="text-amber-400 text-[8px]">📊 click Progress</span>
-                        </div>
-                        <div class="text-[8px] text-indigo-400/60 mt-0.5">Last played: ${new Date(storage.getPlayer(username).lastPlayed).toLocaleDateString()}</div>
-                    </div>
-                `;
-            } catch(e) {
-                container.innerHTML = '';
-            }
-        }
-
-        // Auto-load preview on name blur
-        document.getElementById('player-nickname-input').addEventListener('blur', function() {
-            showProfilePreview(this.value.trim());
-        });
-
-        // Also load on initial page load if there's a default name
-        setTimeout(() => {
-            const input = document.getElementById('player-nickname-input');
-            if (input && input.value.trim()) {
-                showProfilePreview(input.value.trim());
-            }
-        }, 500);
-
         // ---------- AUDIO MANAGER ----------
         class AudioManager {
             constructor() { this.ctx = null; this.muted = false; this.bgInterval = null; this.active = false; this.beat=0; }
@@ -746,6 +516,7 @@
                         gain.gain.setValueAtTime(0.04, now);
                         gain.gain.exponentialRampToValueAtTime(0.001, now+0.22);
                         osc.start(now); osc.stop(now+0.22);
+                        // drum
                         const dOsc = this.ctx.createOscillator();
                         const dGain = this.ctx.createGain();
                         dOsc.connect(dGain); dGain.connect(this.ctx.destination);
@@ -818,15 +589,6 @@
                             gain.gain.exponentialRampToValueAtTime(0.01, now+0.8);
                             osc.start(now); osc.stop(now+0.8);
                             break;
-                        case 'achievement':
-                            osc.type = 'square';
-                            osc.frequency.setValueAtTime(880, now);
-                            osc.frequency.setValueAtTime(1100, now+0.1);
-                            osc.frequency.setValueAtTime(1320, now+0.2);
-                            gain.gain.setValueAtTime(0.08, now);
-                            gain.gain.exponentialRampToValueAtTime(0.001, now+0.4);
-                            osc.start(now); osc.stop(now+0.4);
-                            break;
                     }
                 } catch(e) { /* ignore */ }
             }
@@ -847,434 +609,125 @@
         let gameActive = false, gameOver = false, isPaused = false, isAFK = false;
         let selectedClass = 'engineer', currentDifficulty = 'medium';
         let score = 0, kills = 0, scrap = 150, wave = 1, monstersKilledTotal = 0, mathStreaksTotal = 0;
+        // Omni-Shoot as persistent energy pool – costs 10000 scrap for 30 seconds
         let omniActive = false;
-        let omniTimeRemaining = 0;
-        const OMNI_DURATION = 1800;
+        let omniTimeRemaining = 0; // in frames (30 seconds = 1800 frames)
+        const OMNI_DURATION = 1800; // 30 sec at 60fps
         const OMNI_COST = 10000;
-        let afkTimeRemaining = 30;
+        // AFK Limitation: 30 seconds max, costs 5 scrap/sec
+        let afkTimeRemaining = 30; // seconds
         let afkCostPerSec = 5;
         let afkTimerInterval = null;
         let isEndlessMode = false;
         let baseHp = 100, maxBaseHp = 100, baseShieldActive = false, baseShieldHp = 0;
         let spawnCooldown = 120, currentWaveSpawnsLeft = 10, totalMonstersThisWave = 10, isWaveActive = false;
         let consecutiveCorrect = 0, wrongAnswers = 0, unansweredCount = 0, kidMode = false;
-        let victoryWave = 20;
-        let gameStartTime = Date.now();
-        let scrapEarnedThisGame = 0;
-        let turretsBuiltThisGame = 0;
-        let afkTimeUsed = 0;
-        let perfectWaveThisGame = true;
-        let turretUpgradesThisGame = 0;
-        let omniUsedThisGame = false;
+        let victoryWave = 20; // Win condition
 
         // Entities
         let monsters = [], bullets = [], turrets = [], particles = [], floatingTexts = [];
-        let turretMap = new Map();
-        let turretSlots = [];
+        let turretMap = new Map(); // id -> turret object
+        let turretSlots = []; // will be initialised later with positions
         const TURRET_SLOT_POSITIONS = [
             { x:150, y:180 }, { x:300, y:150 }, { x:500, y:150 }, { x:650, y:180 },
             { x:120, y:350 }, { x:680, y:350 }, { x:220, y:450 }, { x:580, y:450 }
         ];
         let pendingTurretType = null;
 
+        // Player
         let player = {
             x:400, y:300, radius:18, speed:4, angle:0, hp:100, maxHp:100,
             cooldown:0, maxCooldown:12, damage:15, shieldActive:false, shieldHp:0, name:"Defender"
         };
         let clientPlayer = { active:false, x:0, y:0, angle:0, hp:0, maxHp:100, selectedClass:'engineer', name:"Co-Defender" };
 
+        // Multiplayer
         let peer = null, conn = null, isHost = true, isMultiplayer = false;
 
+        // Keyboard
         const keys = {};
         window.addEventListener('keydown', (e) => {
-            const k = e.key.toLowerCase();
-            keys[k] = true;
-            if (k === 'p') window.togglePauseGame();
-            if (k === 'o') window.toggleOmniShoot();
-            if (k === 'm') window.toggleAudioMute();
-            if (k === 'r' && gameActive && !gameOver) window.restartGame();
-            if (k === 'h') window.useHint();
-            handleCheatSequence(e);
-            if (k === '`' || k === '~') {
-                e.preventDefault();
-                openCheatConsole();
-            }
+            keys[e.key.toLowerCase()] = true;
+            if (e.key.toLowerCase() === 'p') togglePauseGame();
+            if (e.key.toLowerCase() === 'o') toggleOmniShoot();
+            if (e.key.toLowerCase() === 'm') toggleAudioMute();
+            if (e.key.toLowerCase() === 'r') { if (gameActive && !gameOver) restartGame(); }
+            if (e.key.toLowerCase() === 'h') useHint();
         });
         window.addEventListener('keyup', (e) => { keys[e.key.toLowerCase()] = false; });
 
-        // ---------- CHEAT SEQUENCE ----------
-        let cheatSequence = '';
-        const CHEAT_SEQUENCE = '↑↑↓↓←→←→ba';
-        let cheatUses = 3;
-        let cheatActive = {};
+        // Mouse target
+        let targetX = null, targetY = null;
+        canvas.addEventListener('mousemove', (e) => {
+            const rect = canvas.getBoundingClientRect();
+            targetX = ((e.clientX - rect.left) / rect.width) * canvas.width;
+            targetY = ((e.clientY - rect.top) / rect.height) * canvas.height;
+        });
+        canvas.addEventListener('mousedown', (e) => {
+            const rect = canvas.getBoundingClientRect();
+            targetX = ((e.clientX - rect.left) / rect.width) * canvas.width;
+            targetY = ((e.clientY - rect.top) / rect.height) * canvas.height;
+            player.cooldown = 0;
+            handleCanvasClick(targetX, targetY);
+        });
 
-        function handleCheatSequence(e) {
-            const key = e.key;
-            const map = { 'ArrowUp': '↑', 'ArrowDown': '↓', 'ArrowLeft': '←', 'ArrowRight': '→' };
-            const mapped = map[key] || key.toLowerCase();
-            cheatSequence += mapped;
-            if (cheatSequence.length > CHEAT_SEQUENCE.length) cheatSequence = cheatSequence.slice(1);
-            if (cheatSequence === CHEAT_SEQUENCE) {
-                cheatSequence = '';
+        // Touch joystick (improved with pointer events)
+        const joystickContainer = document.getElementById('joystick-container');
+        const joystickHandle = document.getElementById('joystick-handle');
+        let stickActive = false, joystickX = 0, joystickY = 0;
+
+        function setupJoystick() {
+            if (!joystickContainer) return;
+            const handlePointerDown = (e) => {
                 e.preventDefault();
-                openCheatConsole();
-            }
+                stickActive = true;
+                handleJoystickMove(e);
+                joystickContainer.setPointerCapture(e.pointerId);
+            };
+            const handlePointerMove = (e) => {
+                if (stickActive) handleJoystickMove(e);
+            };
+            const handlePointerUp = (e) => {
+                stickActive = false;
+                joystickX = 0; joystickY = 0;
+                joystickHandle.style.transform = 'translate(0,0)';
+                joystickContainer.releasePointerCapture(e.pointerId);
+            };
+            joystickContainer.addEventListener('pointerdown', handlePointerDown);
+            window.addEventListener('pointermove', handlePointerMove);
+            window.addEventListener('pointerup', handlePointerUp);
         }
-
-        const CHEATS = {
-            'godmode': { desc: 'Base invincible (10s)', execute: () => { baseShieldActive = true; baseShieldHp = 999; setTimeout(() => { if (!cheatActive.godmode) { baseShieldActive = false; baseShieldHp = 0; } }, 10000); } },
-            'scrap500': { desc: '+500 Scrap', execute: () => { scrap += 500; scrapEarnedThisGame += 500; updateUI(); } },
-            'speedup': { desc: 'Double speed (15s)', execute: () => { player.speed *= 2; setTimeout(() => { player.speed /= 2; }, 15000); } },
-            'killall': { desc: 'Destroy all monsters', execute: () => { triggerMonsterWipe(); } },
-            'extratime': { desc: '+30s math timer', execute: () => { mathEngine.timer += 30; } },
-            'healbase': { desc: 'Heal base +50 HP', execute: () => { baseHp = Math.min(maxBaseHp, baseHp + 50); updateUI(); } }
-        };
-
-        function openCheatConsole() {
-            if (!gameActive || gameOver) return;
-            if (cheatUses <= 0) {
-                floatingTexts.push(new FloatingText(400, 200, "💫 No cheat uses left!", "#f43f5e", 16));
-                return;
-            }
-            document.getElementById('cheat-console')?.remove();
-            const overlay = document.createElement('div');
-            overlay.id = 'cheat-console';
-            overlay.className = 'absolute inset-0 bg-slate-950/80 flex items-center justify-center z-50 cheat-modal';
-            overlay.innerHTML = `
-                <div class="bg-indigo-950 border-2 border-amber-500 rounded-3xl p-6 max-w-sm w-full shadow-2xl">
-                    <h3 class="text-lg font-bold text-amber-400 text-center mb-1">✨ Cheat Console</h3>
-                    <p class="text-xs text-indigo-300 text-center mb-3">Uses left: <span class="text-amber-400 font-bold">${cheatUses}</span></p>
-                    <div class="grid grid-cols-2 gap-2">
-                        ${Object.entries(CHEATS).map(([key, cheat]) => `
-                            <button onclick="window._activateCheat('${key}')" class="bg-slate-900 hover:bg-indigo-900 border border-indigo-800 rounded-xl p-2 text-xs font-bold text-indigo-200 transition hover:scale-105">
-                                ${cheat.desc}
-                            </button>
-                        `).join('')}
-                    </div>
-                    <button onclick="document.getElementById('cheat-console').remove()" class="w-full mt-3 bg-slate-800 hover:bg-slate-700 text-indigo-300 py-2 rounded-xl text-xs uppercase font-bold transition">Close</button>
-                </div>
-            `;
-            document.getElementById('game-container').appendChild(overlay);
+        function handleJoystickMove(e) {
+            const rect = joystickContainer.getBoundingClientRect();
+            const cx = rect.left + rect.width/2;
+            const cy = rect.top + rect.height/2;
+            let dx = e.clientX - cx, dy = e.clientY - cy;
+            const dist = Math.sqrt(dx*dx + dy*dy);
+            const maxDist = rect.width/2;
+            if (dist > maxDist) { dx = (dx/dist)*maxDist; dy = (dy/dist)*maxDist; }
+            joystickHandle.style.transform = `translate(${dx}px, ${dy}px)`;
+            joystickX = dx / maxDist;
+            joystickY = dy / maxDist;
         }
+        setupJoystick();
 
-        window._activateCheat = function(key) {
-            if (cheatUses <= 0) return;
-            const cheat = CHEATS[key];
-            if (!cheat) return;
-            if (cheatActive[key]) {
-                floatingTexts.push(new FloatingText(400, 200, `⏳ ${key} already active!`, "#fbbf24", 14));
-                return;
-            }
-            cheatUses--;
-            cheatActive[key] = true;
-            cheat.execute();
-            floatingTexts.push(new FloatingText(400, 200, `✨ ${cheat.desc}`, "#10b981", 16));
-            audio.play('wipe');
-            setTimeout(() => { cheatActive[key] = false; }, 100);
-            document.getElementById('cheat-console')?.remove();
-            updateUI();
-            updateCheatIndicator();
-        };
-
-        function updateCheatIndicator() {
-            const indicator = document.getElementById('cheat-indicator');
-            const usesSpan = document.getElementById('cheat-uses-left');
-            if (indicator && usesSpan) {
-                if (kidMode || gameActive) {
-                    indicator.classList.remove('hidden');
-                    usesSpan.textContent = cheatUses;
-                } else {
-                    indicator.classList.add('hidden');
+        // Canvas click/tap for turret placement and upgrades
+        function handleCanvasClick(cx, cy) {
+            if (pendingTurretType) {
+                for (let slot of turretSlots) {
+                    if (Math.hypot(slot.x - cx, slot.y - cy) < 25 && slot.turret === null) {
+                        placeTurret(slot, pendingTurretType);
+                        return;
+                    }
+                }
+            } else {
+                for (let slot of turretSlots) {
+                    if (slot.turret && Math.hypot(slot.x - cx, slot.y - cy) < 25) {
+                        buyTurretUpgrade(slot.turret);
+                        return;
+                    }
                 }
             }
-        }
-
-        // ---------- PROGRESS DASHBOARD ----------
-        const progressData = {
-            totalCorrect: 0,
-            totalWrong: 0,
-            problemHistory: [],
-            streaks: [],
-            currentStreak: 0,
-            maxStreak: 0,
-            waveHistory: [],
-            avgResponseTime: 0,
-            problemTypeCount: { '+': 0, '-': 0, '*': 0, '/': 0 },
-            problemTypeCorrect: { '+': 0, '-': 0, '*': 0, '/': 0 },
-            startTime: Date.now()
-        };
-
-        function logProgress(correct, problem) {
-            const op = problem?.rawQuestion?.split(' ')[1] || '+';
-            progressData.problemTypeCount[op] = (progressData.problemTypeCount[op] || 0) + 1;
-            if (correct) {
-                progressData.totalCorrect++;
-                progressData.problemTypeCorrect[op] = (progressData.problemTypeCorrect[op] || 0) + 1;
-                progressData.currentStreak++;
-                if (progressData.currentStreak > progressData.maxStreak) progressData.maxStreak = progressData.currentStreak;
-            } else {
-                progressData.totalWrong++;
-                if (progressData.currentStreak > 0) {
-                    progressData.streaks.push(progressData.currentStreak);
-                    progressData.currentStreak = 0;
-                }
-            }
-        }
-
-        // ---------- ACHIEVEMENTS UI ----------
-        function renderAchievements(username) {
-            const achievements = storage.getAchievements(username);
-            const unlockedCount = achievements.filter(a => a.unlocked).length;
-            const total = achievements.length;
-
-            return `
-                <div class="mt-4 bg-slate-900/60 rounded-xl p-3">
-                    <div class="flex justify-between items-center mb-2">
-                        <span class="text-xs font-bold text-amber-400 uppercase tracking-wider">
-                            🏆 Achievements (${unlockedCount}/${total})
-                        </span>
-                        <span class="text-[10px] text-indigo-400">${Math.round(unlockedCount/total*100)}%</span>
-                    </div>
-                    <div class="w-full bg-slate-950/60 h-2 rounded-full overflow-hidden">
-                        <div class="bg-gradient-to-r from-amber-400 to-amber-500 h-full transition-all duration-700" 
-                             style="width: ${(unlockedCount/total)*100}%"></div>
-                    </div>
-                    <div class="grid grid-cols-3 gap-2 mt-3 max-h-[150px] overflow-y-auto pr-1 achievement-grid">
-                        ${achievements.map(ach => `
-                            <div class="bg-slate-950/60 rounded-xl p-2 text-center ${ach.unlocked ? 'border border-amber-500/30' : 'opacity-40 grayscale'}">
-                                <div class="text-lg">${ach.icon || '🏅'}</div>
-                                <div class="text-[9px] font-bold text-${ach.unlocked ? 'amber' : 'indigo'}-300 truncate">${ach.name}</div>
-                                <div class="text-[8px] text-indigo-400/60 truncate">${ach.description}</div>
-                                ${ach.unlocked ? '<span class="text-[8px] text-amber-400">✓</span>' : ''}
-                            </div>
-                        `).join('')}
-                    </div>
-                    <div class="text-[9px] text-indigo-400/60 mt-2 text-center">
-                        ${unlockedCount === total ? '🌟 All achievements unlocked! You\'re a legend!' : `Keep playing to unlock more!`}
-                    </div>
-                </div>
-            `;
-        }
-
-        // ---------- OPEN PROGRESS DASHBOARD ----------
-        function openProgressDashboard() {
-            document.getElementById('progress-dashboard')?.remove();
-            const username = player.name || document.getElementById('player-nickname-input').value.trim() || 'DEFENDER';
-            const total = progressData.totalCorrect + progressData.totalWrong;
-            const accuracy = total > 0 ? Math.round((progressData.totalCorrect / total) * 100) : 0;
-
-            const achievementsHTML = renderAchievements(username);
-            const profile = storage.getPlayer(username);
-
-            const overlay = document.createElement('div');
-            overlay.id = 'progress-dashboard';
-            overlay.className = 'absolute inset-0 bg-slate-950/90 flex items-center justify-center p-4 z-50';
-            overlay.innerHTML = `
-                <div class="max-w-md w-full bg-indigo-950 border-2 border-indigo-500 rounded-3xl p-6 shadow-2xl max-h-[90vh] overflow-y-auto">
-                    <h3 class="text-xl font-bold text-indigo-300 uppercase tracking-wider text-center flex items-center justify-center gap-2">
-                        <i class="fa-solid fa-chart-line text-emerald-400"></i> Progress Report
-                    </h3>
-                    <p class="text-center text-[10px] text-indigo-400/60 mt-1">${new Date().toLocaleDateString()} · ${profile.gamesPlayed} games played</p>
-
-                    <!-- Lifetime Stats -->
-                    <div class="grid grid-cols-3 gap-2 mt-3 bg-slate-900/40 rounded-xl p-2">
-                        <div class="text-center">
-                            <div class="text-xs font-bold text-amber-400">${profile.totalScore.toLocaleString()}</div>
-                            <div class="text-[8px] text-indigo-400">Lifetime Pts</div>
-                        </div>
-                        <div class="text-center">
-                            <div class="text-xs font-bold text-teal-400">${profile.bestWaveEver}</div>
-                            <div class="text-[8px] text-indigo-400">Best Wave</div>
-                        </div>
-                        <div class="text-center">
-                            <div class="text-xs font-bold text-rose-400">${profile.maxStreakEver}</div>
-                            <div class="text-[8px] text-indigo-400">Best Streak</div>
-                        </div>
-                    </div>
-
-                    <!-- Session Stats -->
-                    <div class="grid grid-cols-2 gap-3 mt-3">
-                        <div class="bg-slate-900/60 rounded-xl p-3 text-center">
-                            <div class="text-2xl font-black text-emerald-400">${accuracy}%</div>
-                            <div class="text-[10px] text-indigo-300 uppercase tracking-wide">Accuracy</div>
-                        </div>
-                        <div class="bg-slate-900/60 rounded-xl p-3 text-center">
-                            <div class="text-2xl font-black text-amber-400">${progressData.maxStreak}</div>
-                            <div class="text-[10px] text-indigo-300 uppercase tracking-wide">Session Streak</div>
-                        </div>
-                        <div class="bg-slate-900/60 rounded-xl p-3 text-center">
-                            <div class="text-2xl font-black text-cyan-400">${progressData.totalCorrect}</div>
-                            <div class="text-[10px] text-indigo-300 uppercase tracking-wide">Correct</div>
-                        </div>
-                        <div class="bg-slate-900/60 rounded-xl p-3 text-center">
-                            <div class="text-2xl font-black text-rose-400">${progressData.totalWrong}</div>
-                            <div class="text-[10px] text-indigo-300 uppercase tracking-wide">Incorrect</div>
-                        </div>
-                    </div>
-
-                    <!-- Achievements -->
-                    ${achievementsHTML}
-
-                    <button onclick="document.getElementById('progress-dashboard').remove()" class="w-full mt-4 bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-2.5 rounded-xl uppercase transition">Close</button>
-                </div>
-            `;
-            document.getElementById('game-container').appendChild(overlay);
-        }
-
-        // ---------- PARENT DASHBOARD ----------
-        function openParentDashboard() {
-            document.getElementById('parent-dashboard')?.remove();
-            const allPlayers = storage.loadAll();
-            const list = Object.values(allPlayers).sort((a,b) => b.totalScore - a.totalScore);
-
-            const overlay = document.createElement('div');
-            overlay.id = 'parent-dashboard';
-            overlay.className = 'absolute inset-0 bg-slate-950/90 flex items-center justify-center p-4 z-50';
-            overlay.innerHTML = `
-                <div class="max-w-2xl w-full bg-indigo-950 border-2 border-emerald-500 rounded-3xl p-6 shadow-2xl max-h-[90vh] overflow-y-auto">
-                    <h3 class="text-xl font-bold text-emerald-400 uppercase tracking-wider text-center flex items-center justify-center gap-2">
-                        <i class="fa-solid fa-users"></i> All Defenders
-                    </h3>
-                    <p class="text-center text-[10px] text-indigo-400/60 mt-1">${list.length} players · ${list.reduce((sum, p) => sum + p.gamesPlayed, 0)} total games</p>
-                    <div class="mt-4 space-y-2">
-                        ${list.map(p => {
-                            const totalAch = Object.keys(ACHIEVEMENTS).length;
-                            const unlocked = (p.unlockedAchievements || []).length;
-                            return `
-                            <div class="bg-slate-900/60 rounded-xl p-3 flex justify-between items-center hover:bg-slate-900 transition">
-                                <div>
-                                    <span class="font-bold text-white">${p.displayName}</span>
-                                    <span class="text-[10px] text-indigo-400 ml-2">${p.gamesPlayed} games</span>
-                                </div>
-                                <div class="flex gap-3 text-xs">
-                                    <span class="text-amber-400">${p.totalScore.toLocaleString()} pts</span>
-                                    <span class="text-teal-400">W${p.bestWaveEver}</span>
-                                    <span class="text-rose-400">🔥${p.maxStreakEver}</span>
-                                    <span class="text-amber-400">🏅${unlocked}/${totalAch}</span>
-                                </div>
-                            </div>
-                            `;
-                        }).join('')}
-                        ${list.length === 0 ? '<div class="text-center text-indigo-400/60 text-sm">No players yet. Start playing!</div>' : ''}
-                    </div>
-                    <button onclick="document.getElementById('parent-dashboard').remove()" class="w-full mt-4 bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-2.5 rounded-xl uppercase transition">Close</button>
-                </div>
-            `;
-            document.getElementById('game-container').appendChild(overlay);
-        }
-
-        // ---------- VISUAL TUTORIAL ----------
-        const tutorialSteps = [
-            { target: '#game-canvas', text: '🎯 This is the battlefield! Move your character with WASD or the joystick.', pos: 'bottom' },
-            { target: '#math-panel', text: '🧮 Answer math questions here! Each correct answer gives you Scrap.', pos: 'top' },
-            { target: '#engineering-station', text: '🔧 Spend Scrap to build turrets. Click a slot on the battlefield to place them!', pos: 'top' },
-            { target: '#omni-shoot-btn', text: '💥 Omni-Shoot: costs 10,000 Scrap for 30 seconds of 360° firing!', pos: 'top' },
-            { target: '#afk-mode-btn', text: '🤖 AFK Mode: auto-shoots for 30 seconds (costs 5 Scrap per second).', pos: 'top' },
-            { target: '#base-hp-text', text: '🏰 Protect your base! If HP reaches 0, the game is over.', pos: 'bottom' }
-        ];
-        let tutorialIndex = 0;
-        let tutorialActive = false;
-
-        function startTutorial() {
-            if (gameActive && !isPaused) window.togglePauseGame();
-            tutorialActive = true;
-            tutorialIndex = 0;
-            showTutorialStep();
-        }
-
-        function showTutorialStep() {
-            document.getElementById('tutorial-overlay')?.remove();
-            if (tutorialIndex >= tutorialSteps.length) {
-                endTutorial();
-                return;
-            }
-            const step = tutorialSteps[tutorialIndex];
-            const overlay = document.createElement('div');
-            overlay.id = 'tutorial-overlay';
-            overlay.className = 'absolute inset-0 bg-slate-950/70 flex items-center justify-center z-50';
-            overlay.style.pointerEvents = 'none';
-
-            const target = document.querySelector(step.target);
-            if (target) {
-                const rect = target.getBoundingClientRect();
-                const containerRect = document.getElementById('game-container').getBoundingClientRect();
-                const highlight = document.createElement('div');
-                highlight.className = 'absolute border-4 border-amber-400 rounded-2xl tutorial-highlight';
-                highlight.style.left = (rect.left - containerRect.left - 8) + 'px';
-                highlight.style.top = (rect.top - containerRect.top - 8) + 'px';
-                highlight.style.width = (rect.width + 16) + 'px';
-                highlight.style.height = (rect.height + 16) + 'px';
-                highlight.style.pointerEvents = 'none';
-                overlay.appendChild(highlight);
-
-                const tooltip = document.createElement('div');
-                const pos = step.pos || 'bottom';
-                tooltip.className = `absolute bg-slate-950/95 border-2 border-amber-400 rounded-2xl p-4 max-w-xs text-sm text-white shadow-2xl pointer-events-auto`;
-                tooltip.style.pointerEvents = 'auto';
-                if (pos === 'bottom') {
-                    tooltip.style.top = (rect.bottom - containerRect.top + 16) + 'px';
-                    tooltip.style.left = Math.max(8, Math.min(rect.left - containerRect.left + rect.width/2 - 120, containerRect.width - 256)) + 'px';
-                } else {
-                    tooltip.style.bottom = (containerRect.bottom - rect.top + 16) + 'px';
-                    tooltip.style.left = Math.max(8, Math.min(rect.left - containerRect.left + rect.width/2 - 120, containerRect.width - 256)) + 'px';
-                }
-                tooltip.innerHTML = `
-                    <p class="text-sm leading-relaxed">${step.text}</p>
-                    <div class="flex justify-between items-center mt-3">
-                        <span class="text-[10px] text-indigo-400">${tutorialIndex + 1}/${tutorialSteps.length}</span>
-                        <button onclick="window.nextTutorialStep()" class="bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold px-4 py-1.5 rounded-xl text-xs uppercase transition pointer-events-auto">
-                            ${tutorialIndex === tutorialSteps.length - 1 ? 'Start Game 🚀' : 'Next →'}
-                        </button>
-                    </div>
-                `;
-                overlay.appendChild(tooltip);
-            } else {
-                overlay.innerHTML = `
-                    <div class="bg-slate-950/95 border-2 border-amber-400 rounded-2xl p-6 max-w-sm text-center pointer-events-auto">
-                        <p class="text-white text-sm">${step.text}</p>
-                        <button onclick="window.nextTutorialStep()" class="mt-4 bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold px-6 py-2 rounded-xl text-sm uppercase transition">
-                            ${tutorialIndex === tutorialSteps.length - 1 ? 'Start Game 🚀' : 'Next →'}
-                        </button>
-                    </div>
-                `;
-            }
-            document.getElementById('game-container').appendChild(overlay);
-        }
-
-        window.nextTutorialStep = function() {
-            tutorialIndex++;
-            document.getElementById('tutorial-overlay')?.remove();
-            if (tutorialIndex < tutorialSteps.length) {
-                showTutorialStep();
-            } else {
-                endTutorial();
-            }
-        };
-
-        function endTutorial() {
-            tutorialActive = false;
-            document.getElementById('tutorial-overlay')?.remove();
-            if (isPaused) window.togglePauseGame();
-            if (!gameActive) {
-                window.launchGame();
-            } else {
-                floatingTexts.push(new FloatingText(400, 200, "🎮 Ready to defend the base!", "#10b981", 20));
-            }
-        }
-
-        // ---------- CANVAS HELPER ----------
-        function drawRoundRect(ctx, x, y, w, h, r) {
-            ctx.beginPath();
-            ctx.moveTo(x + r, y);
-            ctx.lineTo(x + w - r, y);
-            ctx.quadraticCurveTo(x + w, y, x + w, y + r);
-            ctx.lineTo(x + w, y + h - r);
-            ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
-            ctx.lineTo(x + r, y + h);
-            ctx.quadraticCurveTo(x, y + h, x, y + h - r);
-            ctx.lineTo(x, y + r);
-            ctx.quadraticCurveTo(x, y, x + r, y);
-            ctx.closePath();
         }
 
         // ---------- ENTITY CLASSES ----------
@@ -1297,12 +750,12 @@
         class FloatingText {
             constructor(x,y,text,color,size) {
                 this.x=x; this.y=y; this.text=text; this.color=color; this.size=size||14;
-                this.life=60; this.vy=-1;
+                this.life=45; this.vy=-1;
             }
             update() { this.y+=this.vy; this.life--; }
             draw() {
                 ctx.save();
-                ctx.globalAlpha = Math.max(0, this.life/60);
+                ctx.globalAlpha = Math.max(0, this.life/45);
                 ctx.font = `bold ${this.size}px 'Fredoka', sans-serif`;
                 ctx.fillStyle = this.color;
                 ctx.shadowColor = '#000';
@@ -1313,13 +766,13 @@
             }
         }
 
-        // ---------- MATH ENGINE ----------
+        // ---------- MATH ENGINE (Adaptive) ----------
         class MathEngine {
             constructor() {
                 this.currentQuestion = null;
                 this.timer = 20;
                 this.timerInterval = null;
-                this.adaptLevel = 1;
+                this.adaptLevel = 1; // 1-5
                 this.correctHistory = [];
                 this.maxHistory = 10;
                 this.hintActive = false;
@@ -1327,6 +780,7 @@
             }
             generate() {
                 if (!gameActive || gameOver) return;
+                // adapt level based on recent accuracy
                 const recent = this.correctHistory.slice(-5);
                 const correctCount = recent.filter(v => v).length;
                 if (recent.length >= 5) {
@@ -1339,7 +793,7 @@
                 if (this.adaptLevel >= 2) ops.push('-');
                 if (this.adaptLevel >= 3) ops.push('*');
                 if (this.adaptLevel >= 4) ops.push('/');
-                if (kidMode) {
+                if (kidMode) { // Kid mode: only + and -, small numbers
                     op = Math.random() < 0.6 ? '+' : '-';
                     num1 = Math.floor(Math.random() * 10) + 1;
                     num2 = Math.floor(Math.random() * 10) + 1;
@@ -1375,6 +829,7 @@
                     isBonus: isBonus,
                     rawQuestion: `${num1} ${op} ${num2}`
                 };
+                // Kid Mode: double timer
                 this.timer = kidMode ? 40 : 20;
                 this.hintActive = false;
                 if (this.hintTimer) { clearTimeout(this.hintTimer); this.hintTimer = null; }
@@ -1393,6 +848,7 @@
             activateHint() {
                 if (!this.currentQuestion || this.hintActive) return;
                 this.hintActive = true;
+                // Highlight the correct option in the UI
                 const grid = document.getElementById('math-options-grid');
                 if (grid) {
                     const btns = grid.querySelectorAll('button');
@@ -1405,6 +861,7 @@
                     });
                 }
                 floatingTexts.push(new FloatingText(400, 220, "💡 HINT REVEALED!", "#fbbf24", 18));
+                // Auto-clear hint after 3 seconds
                 if (this.hintTimer) clearTimeout(this.hintTimer);
                 this.hintTimer = setTimeout(() => {
                     this.hintActive = false;
@@ -1421,7 +878,21 @@
         }
         const mathEngine = new MathEngine();
 
-        // ---------- UI RENDER MATH ----------
+        // ----- helper for rounded rects (fix for unsupported roundRect) -----
+        function drawRoundRect(ctx, x, y, w, h, r) {
+            ctx.beginPath();
+            ctx.moveTo(x + r, y);
+            ctx.lineTo(x + w - r, y);
+            ctx.quadraticCurveTo(x + w, y, x + w, y + r);
+            ctx.lineTo(x + w, y + h - r);
+            ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+            ctx.lineTo(x + r, y + h);
+            ctx.quadraticCurveTo(x, y + h, x, y + h - r);
+            ctx.lineTo(x, y + r);
+            ctx.quadraticCurveTo(x, y, x + r, y);
+            ctx.closePath();
+        }
+
         function renderMathQuestion(q) {
             const textEl = document.getElementById('math-question-text');
             const gridEl = document.getElementById('math-options-grid');
@@ -1444,11 +915,13 @@
                 btn.onclick = () => handleMathAnswer(idx);
                 gridEl.appendChild(btn);
             });
+            // Update hint button state
             const hintBtn = document.getElementById('hint-btn');
             if (hintBtn) {
                 hintBtn.disabled = (scrap < 50 || mathEngine.hintActive);
                 hintBtn.style.opacity = (scrap < 50 || mathEngine.hintActive) ? '0.5' : '1';
             }
+            // Update extra time button visibility
             const extraBtn = document.getElementById('extra-time-btn');
             if (extraBtn) {
                 if (kidMode) {
@@ -1461,7 +934,6 @@
             }
         }
 
-        // ---------- MATH ANSWER HANDLER ----------
         function handleMathAnswer(index) {
             if (!gameActive || gameOver || isPaused || !mathEngine.currentQuestion) return;
             if (isMultiplayer && !isHost) {
@@ -1469,17 +941,15 @@
                 return;
             }
             const correct = mathEngine.answer(index);
-            logProgress(correct, mathEngine.currentQuestion);
-
             if (correct) {
                 consecutiveCorrect++; unansweredCount = 0; wrongAnswers = 0;
                 let reward = mathEngine.currentQuestion.isBonus ? 500 : 150;
                 scrap += reward; score += 100;
-                scrapEarnedThisGame += reward;
                 audio.play('math-success');
                 floatingTexts.push(new FloatingText(player.x, player.y-10, `+${reward} Scrap`, '#fbbf24', 16));
                 if (isMultiplayer && clientPlayer.active) floatingTexts.push(new FloatingText(clientPlayer.x, clientPlayer.y-10, `+${reward} Scrap`, '#fbbf24', 16));
 
+                // --- Math Monster destruction ---
                 const mathMonsters = monsters.filter(m => m.type === 'math');
                 if (mathMonsters.length > 0) {
                     let closest = null;
@@ -1492,8 +962,8 @@
                         const idx = monsters.indexOf(closest);
                         if (idx !== -1) {
                             for (let i=0; i<20; i++) particles.push(new Particle(closest.x, closest.y, '#a78bfa', Math.random()*4+2));
-                            scrap += 200; score += 100;
-                            scrapEarnedThisGame += 200;
+                            scrap += 200;
+                            score += 100;
                             floatingTexts.push(new FloatingText(closest.x, closest.y-20, "🧠 MATH MONSTER DESTROYED!", "#a78bfa", 16));
                             audio.play('explosion');
                             monsters.splice(idx, 1);
@@ -1547,10 +1017,10 @@
             const maxTime = kidMode ? 40 : 20;
             const percent = Math.max(0, mathEngine.timer / maxTime);
             bar.style.width = `${percent*100}%`;
-            bar.className = percent < 0.3 ? "timer-bar bg-gradient-to-r from-rose-500 to-red-600 h-full w-full transition-all duration-100" : "timer-bar bg-gradient-to-r from-emerald-400 to-teal-500 h-full w-full transition-all duration-100";
+            bar.className = percent < 0.3 ? "bg-gradient-to-r from-rose-500 to-red-600 h-full w-full transition-all duration-100" : "bg-gradient-to-r from-emerald-400 to-teal-500 h-full w-full transition-all duration-100";
         }
 
-        // ---------- HINT & EXTRA TIME ----------
+        // ---------- HINT SYSTEM ----------
         function useHint() {
             if (!gameActive || gameOver || isPaused || !mathEngine.currentQuestion) return;
             if (scrap < 50) {
@@ -1567,6 +1037,7 @@
             if (isMultiplayer && isHost) sendGameState();
         }
 
+        // ---------- EXTRA TIME (Kid Mode) ----------
         function buyExtraTime() {
             if (!gameActive || gameOver || isPaused) return;
             if (!kidMode) {
@@ -1594,11 +1065,17 @@
                 let type = typeOverride || 'normal';
                 let roll = Math.random();
                 if (!typeOverride) {
-                    if (wave >= 2 && roll < 0.10) type = 'math';
-                    else if (wave >= 2 && roll < 0.20) type = 'speedy';
-                    else if (wave >= 3 && roll < 0.35) type = 'tank';
-                    else if (wave >= 5 && roll < 0.45) type = 'boss';
+                    if (wave >= 2 && roll < 0.10) {
+                        type = 'math';
+                    } else if (wave >= 2 && roll < 0.20) {
+                        type = 'speedy';
+                    } else if (wave >= 3 && roll < 0.35) {
+                        type = 'tank';
+                    } else if (wave >= 5 && roll < 0.45) {
+                        type = 'boss';
+                    }
                 }
+                // Smooth difficulty scaling
                 let hp = 20 + wave * 12 + (wave * 1.2);
                 let speed = 0.8 + wave * 0.08;
                 let radius = 15;
@@ -1607,7 +1084,14 @@
                 if (type === 'speedy') { hp = 15 + wave*6; speed = 2.0 + wave*0.15; radius=12; color='#f59e0b'; }
                 else if (type === 'tank') { hp = 60 + wave*25; speed = 0.5 + wave*0.04; radius=22; color='#8b5cf6'; }
                 else if (type === 'boss') { hp = 200 + wave*100; speed = 0.4 + wave*0.02; radius=30; color='#06b6d4'; scrapValue=50; }
-                else if (type === 'math') { hp = 30 + wave*15; speed = 0.6 + wave*0.06; radius = 18; color = '#a78bfa'; scrapValue = 30 + wave*5; }
+                else if (type === 'math') {
+                    hp = 30 + wave*15;
+                    speed = 0.6 + wave*0.06;
+                    radius = 18;
+                    color = '#a78bfa';
+                    scrapValue = 30 + wave*5;
+                }
+                // Difficulty speed multiplier
                 let speedMult = currentDifficulty === 'easy' ? 0.55 : (currentDifficulty === 'hard' ? 1.45 : 1.0);
                 speed *= speedMult;
 
@@ -1645,11 +1129,6 @@
             spawnCooldown = 30;
             floatingTexts.push(new FloatingText(400,240,`WAVE ${wave} INITIATED`,"#f59e0b",22));
             audio.play('wipe');
-            progressData.waveHistory.push({ wave, monsters: totalMonstersThisWave, time: Date.now() });
-            // Check for perfect wave (if we got this far without HP loss)
-            if (baseHp === maxBaseHp && wave > 1) {
-                perfectWaveThisGame = true;
-            }
         }
 
         function triggerMonsterWipe() {
@@ -1695,7 +1174,6 @@
                 }
             } else {
                 baseHp = Math.max(0, baseHp - 20);
-                perfectWaveThisGame = false;
                 floatingTexts.push(new FloatingText(400,300,"-20 Base Health","#ef4444",18));
                 if (baseHp <= 0) triggerGameOver();
             }
@@ -1709,7 +1187,6 @@
             else if (type === 'turret-sniper') cost = 300;
             if (scrap < cost) return;
             scrap -= cost;
-            turretsBuiltThisGame++;
             const id = Math.random().toString(36).substring(2,9);
             const turret = {
                 id, x: slot.x, y: slot.y, type, level:1,
@@ -1734,7 +1211,6 @@
             if (scrap < cost) { floatingTexts.push(new FloatingText(turret.x, turret.y-20, `Need ${cost} Scrap`, "#ef4444", 12)); return; }
             scrap -= cost;
             turret.level += 1;
-            turretUpgradesThisGame++;
             turret.damage = Math.floor(turret.damage * 1.5);
             turret.range = Math.floor(turret.range * 1.15);
             turret.maxHp = Math.floor(turret.maxHp * 1.3);
@@ -1755,7 +1231,6 @@
             pendingTurretType = item;
             document.getElementById('placement-toolbar').classList.remove('hidden');
         }
-
         function cancelTurretPlacement() { pendingTurretType = null; document.getElementById('placement-toolbar').classList.add('hidden'); }
 
         // ---------- MULTIPLAYER ----------
@@ -1811,11 +1286,13 @@
                     }
                 } else {
                     if (data.type === 'sync') {
+                        // sync game state
                         scrap = data.scrap; wave = data.wave; score = data.score; baseHp = data.baseHp;
                         gameOver = data.gameOver;
                         player.x = data.hostPlayer.x; player.y = data.hostPlayer.y;
                         player.angle = data.hostPlayer.angle; player.hp = data.hostPlayer.hp;
                         clientPlayer.name = data.hostPlayer.name || "HOST";
+                        // sync turrets
                         const newTurretMap = new Map();
                         data.turrets.forEach(t => {
                             let slot = turretSlots.find(s => Math.hypot(s.x - t.x, s.y - t.y) < 20);
@@ -1825,8 +1302,10 @@
                             }
                         });
                         turretMap = newTurretMap;
+                        // sync monsters (full array)
                         monsters = data.monsters || [];
                         bullets = data.bullets || [];
+                        // math
                         mathEngine.currentQuestion = data.currentQuestion;
                         mathEngine.timer = data.mathTimer || (kidMode ? 40 : 20);
                         consecutiveCorrect = data.consecutiveCorrect || 0;
@@ -1876,6 +1355,7 @@
         function update() {
             if (!gameActive || gameOver || isPaused) return;
 
+            // Omni-Shoot persistent energy pool
             if (omniActive) {
                 omniTimeRemaining--;
                 if (omniTimeRemaining <= 0) {
@@ -1886,12 +1366,13 @@
                 }
             }
 
+            // AFK mode: drain scrap and timer
             if (isAFK && gameActive && !gameOver && !isPaused) {
-                if (Math.floor(Date.now() / 1000) % 1 === 0 && Math.random() < 0.016) {
+                // Drain scrap per second (every 60 frames)
+                if (Math.floor(Date.now() / 1000) % 1 === 0 && Math.random() < 0.016) { // ~once per second
                     if (scrap >= afkCostPerSec && afkTimeRemaining > 0) {
                         scrap -= afkCostPerSec;
                         afkTimeRemaining--;
-                        afkTimeUsed++;
                         updateAFKIndicator();
                         if (afkTimeRemaining <= 0) {
                             isAFK = false;
@@ -1902,6 +1383,7 @@
                         }
                         updateUI();
                     } else {
+                        // Not enough scrap or time expired
                         if (scrap < afkCostPerSec) {
                             floatingTexts.push(new FloatingText(player.x, player.y-15, "Not enough scrap for AFK!", "#ef4444", 12));
                         }
@@ -1912,6 +1394,7 @@
                 }
             }
 
+            // Player movement
             let dx = 0, dy = 0;
             if (stickActive) { dx = joystickX * player.speed; dy = joystickY * player.speed; }
             else {
@@ -1924,6 +1407,7 @@
             player.x = Math.max(player.radius, Math.min(canvas.width - player.radius, player.x));
             player.y = Math.max(player.radius, Math.min(canvas.height - player.radius, player.y));
 
+            // Aim
             if (targetX !== null && targetY !== null && !isAFK) {
                 player.angle = Math.atan2(targetY - player.y, targetX - player.x);
             } else if (monsters.length > 0) {
@@ -1946,8 +1430,10 @@
             }
             if (isMultiplayer) { if (isHost) sendGameState(); else sendClientUpdate(activeShooting); }
 
+            // Medic passive
             if (selectedClass === 'medic' && Math.random() < 0.005) { baseHp = Math.min(maxBaseHp, baseHp + 2); updateUI(); }
 
+            // Wave spawning
             if (isWaveActive) {
                 spawnCooldown--;
                 if (spawnCooldown <= 0 && currentWaveSpawnsLeft > 0) {
@@ -1957,6 +1443,7 @@
                 if (currentWaveSpawnsLeft <= 0 && monsters.length === 0) {
                     isWaveActive = false;
                     wave++;
+                    // Victory check (unless endless mode)
                     if (!isEndlessMode && wave > victoryWave) {
                         triggerVictory();
                         return;
@@ -1966,6 +1453,7 @@
                 }
             }
 
+            // Monster movement & base damage
             if (!isMultiplayer || isHost) {
                 monsters.forEach((m, idx) => {
                     const angle = Math.atan2(300 - m.y, 400 - m.x);
@@ -1982,7 +1470,6 @@
                             if (baseShieldHp <= 0) baseShieldActive = false;
                         } else {
                             baseHp = Math.max(0, baseHp - dmg);
-                            perfectWaveThisGame = false;
                             floatingTexts.push(new FloatingText(m.x, m.y, `-${dmg} HP`, '#f43f5e', 14));
                             audio.play('hit');
                             for (let i=0; i<10; i++) particles.push(new Particle(m.x, m.y, '#ef4444'));
@@ -1994,6 +1481,7 @@
                 });
             }
 
+            // Bullets - skip damage to math monsters
             bullets.forEach((b, idx) => {
                 b.x += b.dx; b.y += b.dy;
                 if (b.x < 0 || b.x > canvas.width || b.y < 0 || b.y > canvas.height) { bullets.splice(idx,1); return; }
@@ -2012,7 +1500,6 @@
                             if (m.hp <= 0) {
                                 for (let i=0; i<15; i++) particles.push(new Particle(m.x, m.y, ['#f472b6','#38bdf8','#fbbf24','#a78bfa','#34d399'][Math.floor(Math.random()*5)], Math.random()*3.5+2));
                                 scrap += m.scrapValue; score += 50; kills++; monstersKilledTotal++;
-                                scrapEarnedThisGame += m.scrapValue;
                                 audio.play('hit');
                                 floatingTexts.push(new FloatingText(m.x, m.y-10, `+${m.scrapValue} Scrap`, '#fbbf24', 12));
                                 monsters.splice(mIdx,1);
@@ -2024,6 +1511,7 @@
                 }
             });
 
+            // Turrets
             turretSlots.forEach(slot => {
                 if (!slot.turret) return;
                 const t = slot.turret;
@@ -2043,7 +1531,7 @@
                             if (Math.hypot(m.x - t.x, m.y - t.y) < t.range) {
                                 m.hp -= t.damage;
                                 for (let i=0; i<5; i++) particles.push(new Particle(m.x, m.y, '#c084fc', 2));
-                                if (m.hp <= 0) { scrap += m.scrapValue; score += 50; kills++; scrapEarnedThisGame += m.scrapValue; monsters.splice(monsters.indexOf(m),1); updateUI(); }
+                                if (m.hp <= 0) { scrap += m.scrapValue; score += 50; kills++; monsters.splice(monsters.indexOf(m),1); updateUI(); }
                             }
                         });
                         for (let a=0; a<Math.PI*2; a+=Math.PI/8) particles.push(new Particle(t.x, t.y, '#c084fc', 3, Math.cos(a)*4, Math.sin(a)*4, 20));
@@ -2057,8 +1545,10 @@
                 }
             });
 
+            // Particles & floating texts
             particles.forEach((p, idx) => { p.update(); if (p.life <= 0) particles.splice(idx,1); });
             floatingTexts.forEach((ft, idx) => { ft.update(); if (ft.life <= 0) floatingTexts.splice(idx,1); });
+
             if (particles.length > 200) particles.splice(0, particles.length - 200);
 
             updateTogglesUI();
@@ -2070,6 +1560,7 @@
             ctx.fillStyle = '#0f172a';
             ctx.fillRect(0,0,canvas.width,canvas.height);
 
+            // Base
             ctx.fillStyle = '#1e1b4b';
             ctx.beginPath(); ctx.arc(400,300,35,0,Math.PI*2); ctx.fill();
             ctx.lineWidth = 4; ctx.strokeStyle = '#4338ca'; ctx.stroke();
@@ -2087,6 +1578,7 @@
             ctx.textAlign = 'center';
             ctx.fillText("BASE", 400, 304);
 
+            // Turret slots
             turretSlots.forEach(slot => {
                 if (slot.turret) return;
                 ctx.save();
@@ -2104,6 +1596,7 @@
                 ctx.restore();
             });
 
+            // Turrets with HP bars
             turretSlots.forEach(slot => {
                 if (!slot.turret) return;
                 const t = slot.turret;
@@ -2122,6 +1615,7 @@
                 ctx.font = "bold 9px 'Share Tech Mono', monospace";
                 ctx.textAlign = 'center';
                 ctx.fillText(`L${t.level}`, t.x, t.y+3);
+                // HP bar
                 const hpPercent = t.hp / t.maxHp;
                 ctx.fillStyle = '#1e1b4b';
                 ctx.fillRect(t.x-18, t.y-24, 36, 5);
@@ -2130,11 +1624,13 @@
                 ctx.restore();
             });
 
+            // Player
             ctx.save();
             ctx.fillStyle = '#fff';
             ctx.font = "bold 11px 'Fredoka', sans-serif";
             ctx.textAlign = 'center';
             ctx.fillText(player.name, player.x, player.y - player.radius - 8);
+            // HP ring
             const hpAngle = (player.hp / player.maxHp) * Math.PI * 2;
             ctx.beginPath();
             ctx.arc(player.x, player.y, player.radius + 4, -Math.PI/2, -Math.PI/2 + hpAngle);
@@ -2149,6 +1645,7 @@
             ctx.fillRect(5,-4,18,8);
             ctx.restore();
 
+            // Shield bubble for player
             if (player.shieldActive && player.shieldHp > 0) {
                 ctx.save();
                 ctx.strokeStyle = '#22d3ee';
@@ -2158,6 +1655,7 @@
                 ctx.restore();
             }
 
+            // Client player
             if (isMultiplayer && clientPlayer.active) {
                 ctx.save();
                 ctx.fillStyle = '#fff';
@@ -2173,12 +1671,14 @@
                 ctx.restore();
             }
 
+            // Monsters
             monsters.forEach(m => {
                 ctx.save();
                 const wobble = Math.sin(Date.now()/150 + m.wiggleOffset) * 2;
                 const r = m.radius + wobble*0.45;
                 ctx.fillStyle = m.color;
                 ctx.beginPath(); ctx.arc(m.x, m.y+wobble, r, 0, Math.PI*2); ctx.fill();
+                // HP bar
                 const pct = m.hp / m.maxHp;
                 ctx.fillStyle = '#1e1b4b';
                 ctx.fillRect(m.x-15, m.y - m.radius - 16, 30, 4);
@@ -2188,6 +1688,7 @@
                 ctx.font = "bold 9px 'Fredoka', sans-serif";
                 ctx.textAlign = 'center';
                 ctx.fillText(m.name, m.x, m.y - m.radius - 22);
+                // Eyes
                 ctx.fillStyle = '#fff';
                 ctx.beginPath(); ctx.arc(m.x - r*0.35, m.y+wobble - r*0.15, r*0.3, 0, Math.PI*2); ctx.fill();
                 ctx.fillStyle = '#000';
@@ -2198,15 +1699,18 @@
                 ctx.beginPath(); ctx.arc(m.x + r*0.25 + Math.cos(Date.now()/90)*(r*0.1), m.y+wobble - r*0.2 + Math.sin(Date.now()/110)*(r*0.1), r*0.15, 0, Math.PI*2); ctx.fill();
                 ctx.fillStyle = '#f43f5e';
                 ctx.beginPath(); ctx.arc(m.x, m.y+wobble + r*0.45, r*0.18 + Math.abs(wobble)*0.1, 0, Math.PI*2); ctx.fill();
+
                 if (m.type === 'math') {
                     ctx.fillStyle = '#fff';
                     ctx.font = "bold 20px 'Fredoka', sans-serif";
                     ctx.textAlign = 'center';
                     ctx.fillText('❓', m.x, m.y + wobble - r - 10);
                 }
+
                 ctx.restore();
             });
 
+            // Bullets
             bullets.forEach(b => {
                 ctx.save();
                 ctx.fillStyle = b.color;
@@ -2217,6 +1721,7 @@
             particles.forEach(p => p.draw());
             floatingTexts.forEach(ft => ft.draw());
 
+            // HUD overlay on canvas
             ctx.fillStyle = '#fff';
             ctx.font = "bold 13px 'Fredoka', sans-serif";
             ctx.textAlign = 'left';
@@ -2228,6 +1733,7 @@
                 ctx.fillText(isHost ? "HOSTING SESSION" : "PLAYING CO-OP", 15, 65);
             }
 
+            // Status overlay for Omni (using helper to avoid roundRect)
             if (omniActive) {
                 const sec = Math.ceil(omniTimeRemaining / 60);
                 ctx.save();
@@ -2277,6 +1783,7 @@
             document.getElementById('hud-scrap').textContent = scrap;
             document.getElementById('base-hp-text').textContent = `${baseHp}/${maxBaseHp}`;
             updateArmorHUD();
+            // Update hint button state
             const hintBtn = document.getElementById('hint-btn');
             if (hintBtn) {
                 hintBtn.disabled = (scrap < 50 || mathEngine.hintActive);
@@ -2287,13 +1794,13 @@
                 extraBtn.disabled = (scrap < 30);
                 extraBtn.style.opacity = (scrap < 30) ? '0.5' : '1';
             }
+            // Kid Mode UI simplification
             const sidePanel = document.getElementById('side-panel');
             if (kidMode) {
-                sidePanel.classList.add('kid-mode');
+                sidePanel.classList.add('kid-mode-simple');
             } else {
-                sidePanel.classList.remove('kid-mode');
+                sidePanel.classList.remove('kid-mode-simple');
             }
-            updateCheatIndicator();
         }
 
         function updateTogglesUI() {
@@ -2341,11 +1848,14 @@
                 if (costPerSec) costPerSec.textContent = afkCostPerSec;
             } else {
                 indicator.classList.add('hidden');
-                if (!isAFK && gameActive) afkTimeRemaining = 30;
+                // Reset AFK timer when not active
+                if (!isAFK && gameActive) {
+                    afkTimeRemaining = 30;
+                }
             }
         }
 
-        // ---------- TOGGLES ----------
+        // ---------- OMNI-SHOOT TOGGLE ----------
         function toggleOmniShoot() {
             if (!gameActive || gameOver || isPaused) return;
             if (omniActive) {
@@ -2359,16 +1869,17 @@
             scrap -= OMNI_COST;
             omniActive = true;
             omniTimeRemaining = OMNI_DURATION;
-            omniUsedThisGame = true;
             floatingTexts.push(new FloatingText(player.x, player.y-10, "OMNI-SHOOT ACTIVATED!", "#fbbf24", 16));
             audio.play('wipe');
             updateUI();
             updateTogglesUI();
         }
 
+        // ---------- TOGGLE AFK ----------
         function toggleAFKMode() {
             if (!gameActive || gameOver || isPaused) return;
             if (!isAFK) {
+                // Check if we have enough scrap to start
                 if (scrap < afkCostPerSec) {
                     floatingTexts.push(new FloatingText(player.x, player.y-10, `Need ${afkCostPerSec} scrap to start AFK`, "#ef4444", 12));
                     return;
@@ -2380,7 +1891,7 @@
                 isAFK = true;
             } else {
                 isAFK = false;
-                afkTimeRemaining = 30;
+                afkTimeRemaining = 30; // reset when turned off manually
             }
             updateTogglesUI();
             updateUI();
@@ -2399,82 +1910,7 @@
             audio.toggleMute();
         }
 
-        // ---------- SAVE GAME STATS (Achievements) ----------
-        function saveGameStats() {
-            const username = player.name || document.getElementById('player-nickname-input').value.trim() || 'DEFENDER';
-            const profile = storage.getPlayer(username);
-
-            // Update cumulative stats
-            profile.gamesPlayed += 1;
-            profile.totalPlayTime += (Date.now() - gameStartTime) / 1000;
-            profile.totalScore += score;
-            profile.totalKills += kills;
-            profile.totalWavesReached += wave;
-            profile.totalMathStreaks += mathStreaksTotal;
-            profile.totalScrapCollected += scrapEarnedThisGame;
-            profile.totalTurretsBuilt += turretsBuiltThisGame;
-
-            // Track bests
-            if (consecutiveCorrect > profile.maxStreakEver) {
-                profile.maxStreakEver = consecutiveCorrect;
-            }
-            if (wave > profile.bestWaveEver) {
-                profile.bestWaveEver = wave;
-            }
-            if (score > profile.bestScoreEver) {
-                profile.bestScoreEver = score;
-            }
-            if (kills > profile.mostKillsInGame) {
-                profile.mostKillsInGame = kills;
-            }
-            turretSlots.forEach(slot => {
-                if (slot.turret && slot.turret.level > profile.maxTurretLevel) {
-                    profile.maxTurretLevel = slot.turret.level;
-                }
-            });
-            if (omniUsedThisGame) profile.omniUses = (profile.omniUses || 0) + 1;
-            profile.totalAfkSeconds = (profile.totalAfkSeconds || 0) + afkTimeUsed;
-            if (perfectWaveThisGame && wave > 1) profile.perfectWaves = (profile.perfectWaves || 0) + 1;
-            if (isEndlessMode && wave >= 30) profile.isEndlessSurvivor = true;
-
-            // Check achievements
-            const newAchievements = storage.checkAchievements(username);
-
-            // Show unlocked achievements with fanfare
-            if (newAchievements.length > 0) {
-                newAchievements.forEach(ach => {
-                    floatingTexts.push(new FloatingText(400, 180 + Math.random()*80,
-                        `🏆 ${ach.name} - ${ach.description}`, '#fbbf24', 16));
-                    if (ach.reward) {
-                        scrap += ach.reward;
-                        scrapEarnedThisGame += ach.reward;
-                        floatingTexts.push(new FloatingText(400, 215 + Math.random()*40,
-                            `+${ach.reward} Scrap Bonus!`, '#10b981', 14));
-                    }
-                    audio.play('achievement');
-                });
-                updateUI();
-            }
-
-            // Update the end screen with achievement count
-            document.getElementById('end-achievements-count').textContent = newAchievements.length;
-            if (newAchievements.length > 0) {
-                const listEl = document.getElementById('end-achievements-list');
-                listEl.classList.remove('hidden');
-                listEl.innerHTML = newAchievements.map(a =>
-                    `<div class="bg-amber-500/10 rounded p-1.5 my-1 border border-amber-500/20 flex items-center gap-2">
-                        <span>${a.icon || '🏅'}</span>
-                        <span class="font-bold">${a.name}</span>
-                        <span class="text-emerald-400">+${a.reward} scrap</span>
-                    </div>`
-                ).join('');
-            }
-
-            storage.saveAll();
-            updateUI();
-        }
-
-        // ---------- GAME STATE ----------
+        // ---------- GAME STATE MANAGEMENT ----------
         function restartGame() {
             monsters = []; bullets = []; particles = []; floatingTexts = [];
             turretSlots = TURRET_SLOT_POSITIONS.map(pos => ({ ...pos, turret: null, hovered: false }));
@@ -2487,31 +1923,12 @@
             consecutiveCorrect = 0; wrongAnswers = 0; unansweredCount = 0;
             omniActive = false; omniTimeRemaining = 0;
             isEndlessMode = false;
-            afkTimeRemaining = 30; isAFK = false;
-            cheatUses = 3;
-            Object.keys(cheatActive).forEach(k => cheatActive[k] = false);
-            gameStartTime = Date.now();
-            scrapEarnedThisGame = 0;
-            turretsBuiltThisGame = 0;
-            afkTimeUsed = 0;
-            perfectWaveThisGame = true;
-            turretUpgradesThisGame = 0;
-            omniUsedThisGame = false;
-
-            // Reset progress data for this session
-            progressData.totalCorrect = 0;
-            progressData.totalWrong = 0;
-            progressData.currentStreak = 0;
-            progressData.maxStreak = 0;
-            progressData.streaks = [];
-            progressData.problemTypeCount = { '+': 0, '-': 0, '*': 0, '/': 0 };
-            progressData.problemTypeCorrect = { '+': 0, '-': 0, '*': 0, '/': 0 };
-
+            afkTimeRemaining = 30;
+            isAFK = false;
             updateTogglesUI(); updateArmorHUD();
             document.getElementById('game-over-screen').classList.add('hidden');
             document.getElementById('leaderboard-submit-box').classList.remove('hidden');
             document.getElementById('endless-mode-box').classList.add('hidden');
-            document.getElementById('end-achievements-list').classList.add('hidden');
             const submitName = document.getElementById('leaderboard-name-input');
             if (submitName) {
                 if (isMultiplayer && clientPlayer.active) submitName.value = `${player.name} & ${clientPlayer.name}`;
@@ -2525,37 +1942,19 @@
             startNewWave();
             audio.startBg();
             document.getElementById('pause-overlay').classList.add('hidden');
+            // Apply Kid Mode UI
+            const sidePanel = document.getElementById('side-panel');
+            if (kidMode) {
+                sidePanel.classList.add('kid-mode-simple');
+            } else {
+                sidePanel.classList.remove('kid-mode-simple');
+            }
+            // Show extra time button in kid mode
             const extraBtn = document.getElementById('extra-time-btn');
             if (extraBtn) {
                 if (kidMode) extraBtn.classList.remove('hidden');
                 else extraBtn.classList.add('hidden');
             }
-            updateCheatIndicator();
-
-            // Show welcome back message for returning players
-            const username = player.name || document.getElementById('player-nickname-input').value.trim() || 'DEFENDER';
-            const profile = storage.getPlayer(username);
-            if (profile.gamesPlayed > 1) {
-                const lastPlayed = new Date(profile.lastPlayed);
-                const daysAgo = Math.floor((Date.now() - lastPlayed) / (1000 * 60 * 60 * 24));
-                let msg = `👋 Welcome back, ${username}!`;
-                if (daysAgo === 0) msg = ' Playing again so soon? Awesome!';
-                else if (daysAgo === 1) msg = ' You played yesterday! Keep the streak!';
-                else if (daysAgo < 7) msg = ` It's been ${daysAgo} days — ready to defend the base?`;
-                else msg = ` Long time no see! Let's show those monsters who's boss!`;
-                floatingTexts.push(new FloatingText(400, 160, msg, '#38bdf8', 16));
-
-                // Show their best achievement
-                const achievements = storage.getAchievements(username);
-                const unlocked = achievements.filter(a => a.unlocked);
-                if (unlocked.length > 0) {
-                    const best = unlocked.sort((a,b) => (b.reward||0) - (a.reward||0))[0];
-                    floatingTexts.push(new FloatingText(400, 190,
-                        `🏆 Your best: ${best.name}`, '#fbbf24', 14));
-                }
-            }
-
-            console.log('Game restarted!');
         }
 
         function triggerGameOver() {
@@ -2563,10 +1962,6 @@
             audio.stopBg();
             if (mathEngine.timerInterval) clearInterval(mathEngine.timerInterval);
             if (afkTimerInterval) { clearInterval(afkTimerInterval); afkTimerInterval = null; }
-
-            // Save stats and check achievements
-            saveGameStats();
-
             document.getElementById('end-screen-title').textContent = "Base Defeated";
             document.getElementById('end-screen-title').className = "text-3xl font-black text-rose-500 uppercase tracking-wider";
             document.getElementById('end-wave-val').textContent = wave;
@@ -2586,10 +1981,6 @@
             audio.stopBg();
             if (mathEngine.timerInterval) clearInterval(mathEngine.timerInterval);
             if (afkTimerInterval) { clearInterval(afkTimerInterval); afkTimerInterval = null; }
-
-            // Save stats and check achievements
-            saveGameStats();
-
             document.getElementById('end-screen-title').textContent = "🏆 VICTORY!";
             document.getElementById('end-screen-title').className = "text-3xl font-black text-amber-400 uppercase tracking-wider";
             document.getElementById('end-wave-val').textContent = wave;
@@ -2605,35 +1996,30 @@
         }
 
         function startEndlessMode() {
+            // Reset game state but keep wave count and continue
             gameActive = true; gameOver = false; isPaused = false;
             isEndlessMode = true;
             baseHp = 100; baseShieldActive = false; baseShieldHp = 0;
             player.hp = player.maxHp;
             player.shieldActive = false; player.shieldHp = 0;
             monsters = []; bullets = []; particles = []; floatingTexts = [];
+            // Keep turrets, scrap, score, wave
             document.getElementById('game-over-screen').classList.add('hidden');
             document.getElementById('endless-mode-box').classList.add('hidden');
+            // Reset some stuff
             consecutiveCorrect = 0; wrongAnswers = 0; unansweredCount = 0;
             omniActive = false; omniTimeRemaining = 0;
             afkTimeRemaining = 30; isAFK = false;
-            cheatUses = 3;
-            gameStartTime = Date.now();
-            scrapEarnedThisGame = 0;
-            turretsBuiltThisGame = 0;
-            afkTimeUsed = 0;
-            perfectWaveThisGame = true;
-            turretUpgradesThisGame = 0;
-            omniUsedThisGame = false;
             updateTogglesUI(); updateArmorHUD();
+            // Start from current wave + 1
             wave = wave + 1;
-            victoryWave = 999999;
+            victoryWave = 999999; // No victory condition
             mathEngine.generate();
             startMathTimer();
             startNewWave();
             audio.startBg();
             floatingTexts.push(new FloatingText(400, 200, "♾️ ENDLESS MODE ACTIVATED!", "#10b981", 24));
             updateUI();
-            updateCheatIndicator();
         }
 
         function goHome() {
@@ -2648,11 +2034,6 @@
             isMultiplayer = false; isHost = true; clientPlayer.active = false;
             isEndlessMode = false;
             victoryWave = 20;
-            // Update profile preview on home screen
-            const input = document.getElementById('player-nickname-input');
-            if (input && input.value.trim()) {
-                showProfilePreview(input.value.trim());
-            }
         }
 
         // ---------- HOME SCREEN FUNCTIONS ----------
@@ -2668,11 +2049,6 @@
             else if (cls === 'engineer') { player.maxCooldown = 12; player.damage = 15; }
             else if (cls === 'medic') { player.maxCooldown = 12; player.damage = 15; }
             else if (cls === 'commando') { player.maxCooldown = 11; player.damage = 22; }
-            // Save preference
-            const username = document.getElementById('player-nickname-input').value.trim();
-            if (username) {
-                storage.updatePlayer(username, { classType: cls });
-            }
         };
         window.selectDifficulty = function(diff) {
             currentDifficulty = diff;
@@ -2682,67 +2058,24 @@
             });
             const active = document.getElementById(`diff-${diff}`);
             if (active) { active.classList.remove('border-slate-700','bg-slate-900/60'); active.classList.add('border-indigo-500','bg-indigo-900'); }
-            const username = document.getElementById('player-nickname-input').value.trim();
-            if (username) {
-                storage.updatePlayer(username, { difficulty: diff });
-            }
         };
         window.generateRandomNickname = function() {
             const first = ['Poopy','Farty','Snotty','Giggle','Burpy','Tooty','Wobbly','Soggy','Squeaky','Silly','Slimy','Goofy','Noodle','Chunky'];
             const last = ['McSplat','McFly','Zilla','Blaster','Gobbler','Pants','Doodle','Muffin','Wiggle','Snoot','Bubbles','Bum'];
-            const name = first[Math.floor(Math.random()*first.length)] + ' ' + last[Math.floor(Math.random()*last.length)];
-            document.getElementById('player-nickname-input').value = name;
-            showProfilePreview(name);
+            document.getElementById('player-nickname-input').value = first[Math.floor(Math.random()*first.length)] + ' ' + last[Math.floor(Math.random()*last.length)];
         };
-
-        // ---------- LAUNCH GAME ----------
         window.launchGame = function() {
-            console.log('🚀 Launching game...');
-            try {
-                kidMode = document.getElementById('kid-mode-toggle').checked;
-                const nick = document.getElementById('player-nickname-input').value.trim() || "DEFENDER";
-                player.name = nick.toUpperCase();
-
-                // Load or create player profile
-                const profile = storage.getPlayer(nick);
-                // Apply saved preferences
-                if (profile.kidModeEnabled !== undefined) {
-                    document.getElementById('kid-mode-toggle').checked = profile.kidModeEnabled;
-                    kidMode = profile.kidModeEnabled;
-                }
-                if (profile.classType) {
-                    selectedClass = profile.classType;
-                    // Update UI selection
-                    document.querySelectorAll('.class-btn').forEach(b => {
-                        b.classList.remove('border-indigo-500','bg-indigo-900');
-                        b.classList.add('border-slate-700','bg-slate-900/60');
-                    });
-                    const active = document.getElementById(`class-${profile.classType}`);
-                    if (active) { active.classList.remove('border-slate-700','bg-slate-900/60'); active.classList.add('border-indigo-500','bg-indigo-900'); }
-                }
-                if (profile.difficulty) {
-                    currentDifficulty = profile.difficulty;
-                    document.querySelectorAll('.diff-btn').forEach(b => {
-                        b.classList.remove('border-indigo-500','bg-indigo-900');
-                        b.classList.add('border-slate-700','bg-slate-900/60');
-                    });
-                    const active = document.getElementById(`diff-${profile.difficulty}`);
-                    if (active) { active.classList.remove('border-slate-700','bg-slate-900/60'); active.classList.add('border-indigo-500','bg-indigo-900'); }
-                }
-
-                document.getElementById('home-screen').classList.add('hidden');
-                document.getElementById('room-info-badge').classList.add('hidden');
-                isEndlessMode = false;
-                victoryWave = 20;
-                restartGame();
-                console.log('✅ Game launched successfully for player:', player.name);
-            } catch(e) {
-                console.error('❌ Error launching game:', e);
-                alert('Something went wrong starting the game. Please try again.');
-            }
+            kidMode = document.getElementById('kid-mode-toggle').checked;
+            const nick = document.getElementById('player-nickname-input').value.trim() || "DEFENDER";
+            player.name = nick.toUpperCase();
+            document.getElementById('home-screen').classList.add('hidden');
+            document.getElementById('room-info-badge').classList.add('hidden');
+            isEndlessMode = false;
+            victoryWave = 20;
+            restartGame();
         };
 
-        // ---------- EXPOSE ALL GLOBAL FUNCTIONS ----------
+        // Expose global functions
         window.hostGame = hostGame;
         window.joinGame = joinGame;
         window.restartGame = restartGame;
@@ -2762,27 +2095,11 @@
         window.useHint = useHint;
         window.buyExtraTime = buyExtraTime;
         window.startEndlessMode = startEndlessMode;
-        window.openProgressDashboard = openProgressDashboard;
-        window.openParentDashboard = openParentDashboard;
-        window.startTutorial = startTutorial;
-        window.nextTutorialStep = nextTutorialStep;
-        window._activateCheat = _activateCheat;
-        window.showProfilePreview = showProfilePreview;
 
-        // ---------- INIT ----------
+        // Initialize turretSlots
         turretSlots = TURRET_SLOT_POSITIONS.map(pos => ({ ...pos, turret: null, hovered: false }));
 
-        // Check if there's a name already in the input and show preview
-        setTimeout(() => {
-            const input = document.getElementById('player-nickname-input');
-            if (input && input.value.trim()) {
-                showProfilePreview(input.value.trim());
-            }
-        }, 300);
-
-        console.log('🚀 Monster Siege v2.4 – Full integration: Storage, Achievements, Auto-load, Parent Dashboard');
-        console.log('💡 Click "Start Singleplayer Game" to begin!');
-        console.log('🏆 Achievements are saved automatically in your browser.');
+        console.log('🚀 Monster Siege v2.2 – Kid Mode, Hints, AFK Limit, Endless Mode!');
     </script>
 </body>
 </html>
