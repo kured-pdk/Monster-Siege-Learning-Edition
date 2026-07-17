@@ -361,11 +361,18 @@
 
         // ---------- FIREBASE CONFIG (mock fallback) ----------
         const appId = typeof __app_id !== 'undefined' ? __app_id : 'monster-siege-learning';
-        const firebaseConfig = typeof __firebase_config !== 'undefined' 
-            ? JSON.parse(__firebase_config) 
-            : { apiKey:"mock-api-key", authDomain:"mock-auth-domain", projectId:"mock-project-id", storageBucket:"mock-storage-bucket", messagingSenderId:"mock-sender-id", appId:"mock-app-id" };
 
-        let useMockDatabase = false;
+const firebaseConfig = {
+  apiKey: "AIzaSyCCcwFKCGw_Te21xRq9jOzII0PqS8n78qM",
+  authDomain: "monster-siege-kids.firebaseapp.com",
+  projectId: "monster-siege-kids",
+  storageBucket: "monster-siege-kids.firebasestorage.app",
+  messagingSenderId: "982107635775",
+  appId: "1:982107635775:web:be655369e66ceeccf6388a",
+  measurementId: "G-HTM55F9E75"
+};
+
+       let useMockDatabase = false;
         let app, auth, db;
         try {
             if (firebaseConfig.apiKey === "mock-api-key") useMockDatabase = true;
